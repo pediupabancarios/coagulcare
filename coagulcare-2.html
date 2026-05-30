@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>CoagulCare</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f172a;--navy2:#1e293b;--navy3:#334155;--slate:#475569;
+  --muted:#64748b;--muted2:#94a3b8;--border:#e2e8f0;--bg:#f8fafc;
+  --white:#fff;--indigo:#4f46e5;--indigo2:#4338ca;
+  --red:#dc2626;--rl:#fef2f2;--rb:#fecaca;
+  --green:#16a34a;--gl:#f0fdf4;--gb:#bbf7d0;
+  --orange:#ea580c;--ol:#fff7ed;--ob:#fed7aa;
+  --font:'Sora',sans-serif;
+}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--navy);overflow:hidden}
+#app{display:flex;height:100vh;width:100vw;overflow:hidden;position:relative}
+
+/* SIDEBAR */
+#sidebar{position:fixed;top:0;left:0;height:100vh;width:260px;background:var(--navy);display:flex;flex-direction:column;z-index:300;transform:translateX(-100%);transition:transform .25s ease}
+#sidebar.open{transform:translateX(0)}
+@media(min-width:900px){#sidebar{position:relative;transform:none!important;width:220px;flex-shrink:0}#overlay{display:none!important}#menu-toggle{display:none!important}}
+#overlay{display:none;position:fixed;inset:0;background:#0009;z-index:200}
+#overlay.show{display:block}
+.logo-wrap{padding:18px 16px;border-bottom:1px solid var(--navy2);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f87171,#dc2626);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.logo-name{font-weight:800;font-size:14px;color:#fff}.logo-sub{font-size:10px;color:var(--muted2);margin-top:1px}
+nav{flex:1;padding:10px;overflow-y:auto}
+.nb{width:100%;display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:9px;border:none;cursor:pointer;margin-bottom:3px;background:transparent;color:var(--muted2);font-size:13px;font-weight:500;font-family:var(--font);transition:background .15s,color .15s;text-align:left}
+.nb:hover{background:var(--navy2);color:#fff}.nb.active{background:var(--indigo);color:#fff;font-weight:700}
+.ni{font-size:16px;flex-shrink:0}.adot{font-size:10px;font-weight:700;background:var(--red);color:#fff;border-radius:20px;padding:1px 6px;margin-left:auto}
+.sb-bot{padding:8px 10px 6px;flex-shrink:0}
+.sb-user{padding:12px 14px;border-top:1px solid var(--navy2);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.uav{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0}
+.uname{font-size:11px;font-weight:700;color:#f1f5f9;line-height:1.3}.urole{font-size:10px;color:var(--muted);margin-top:1px}
+.ubadge{font-size:9px;border-radius:4px;padding:1px 5px;font-weight:700;display:inline-block;margin-top:2px;color:#fff}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;width:100%;min-width:0;overflow:hidden}
+#topbar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#menu-toggle{background:none;border:none;cursor:pointer;font-size:24px;color:var(--navy3);padding:0;flex-shrink:0;line-height:1}
+.sw{flex:1;position:relative}.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:13px;pointer-events:none}
+.sinput{width:100%;padding:8px 12px 8px 32px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;outline:none;background:var(--bg);font-family:var(--font)}
+.sinput:focus{border-color:var(--indigo)}
+.bellb{background:none;border:none;cursor:pointer;font-size:20px;flex-shrink:0}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+#content::-webkit-scrollbar{width:3px}#content::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:9px}
+#footer{border-top:1px solid var(--border);padding:7px 14px;display:flex;justify-content:space-between;background:var(--white);flex-shrink:0}
+#footer span{font-size:10px;color:var(--muted2)}
+
+/* PAGES */
+.page{padding:16px 14px;display:none;animation:fi .2s ease}.page.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.ptitle{font-size:18px;font-weight:800;color:var(--navy);margin-bottom:16px}
+.slbl{font-size:11px;font-weight:700;color:var(--slate);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em}
+
+/* CARDS */
+.card{background:var(--white);border:1.5px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:16px}
+.chdr{padding:12px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.ctitle{font-weight:700;font-size:13px;color:var(--navy)}
+.cbody{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cpad{padding:14px}
+
+/* CAT GRID */
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+@media(min-width:500px){.cat-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.cat-grid{grid-template-columns:repeat(6,1fr)}}
+.catc{border-radius:12px;padding:14px 8px;cursor:pointer;text-align:center;border:1.5px solid;transition:transform .15s;min-width:0}
+.catc:active{transform:scale(.97)}.cati{font-size:22px;margin-bottom:5px}
+.catn{font-size:11px;font-weight:700;line-height:1.3;word-break:break-word}
+.cats{font-size:10px;color:var(--muted2);margin-top:1px}.catct{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ATALHOS */
+.atl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+@media(min-width:700px){.atl-grid{grid-template-columns:repeat(4,1fr)}}
+.atlb{background:var(--white);border:1.5px solid var(--border);border-radius:11px;padding:12px 10px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--navy3);transition:border-color .15s;min-width:0}
+.atlb:hover{border-color:var(--indigo)}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;min-width:480px}
+th{padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+td{padding:10px 8px;font-size:12px;color:var(--navy);border-bottom:1px solid #f8fafc;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}tbody tr:hover{background:#f8fafc}
+
+/* BADGES */
+.badge{border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;border:1px solid;display:inline-block;white-space:nowrap}
+.bg2{background:var(--rl);color:var(--red);border-color:var(--rb)}
+.bm{background:var(--ol);color:var(--orange);border-color:var(--ob)}
+.bl{background:var(--gl);color:var(--green);border-color:var(--gb)}
+.bu{background:var(--gl);color:var(--green);border-color:var(--gb);font-size:10px}
+.bmaster{background:#fef3c7;color:#92400e;border-color:#fde68a;font-size:10px}
+.bgestor{background:#ede9fe;color:#5b21b6;border-color:#ddd6fe;font-size:10px}
+
+/* ACTIONS */
+.ab{border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.av2{background:#eff6ff}.ae{background:#f0fdf4}.adel{background:#fef2f2}
+.acc{display:flex;gap:4px}
+
+/* PAGINATION */
+.pag{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;flex-wrap:wrap;gap:6px}
+.pag-i{font-size:11px;color:var(--muted2)}.pag-b{display:flex;gap:3px}
+.pb{width:27px;height:27px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.pb.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+
+/* BTNS */
+.btnp{background:var(--indigo);color:#fff;border:none;border-radius:8px;padding:8px 13px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font);white-space:nowrap}
+.btnp:hover{background:var(--indigo2)}
+.btno{background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:500;color:var(--navy3);font-family:var(--font);display:inline-flex;align-items:center;gap:5px}
+.btno:hover{border-color:var(--indigo)}
+.btnd{background:var(--red);color:#fff;border:none;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font)}
+.backb{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:22px;padding:0 4px;line-height:1}
+
+/* DETAIL */
+.dhdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+.dleft{display:flex;align-items:flex-start;gap:8px}
+.ptit{font-size:17px;font-weight:800;color:var(--navy);margin:0}
+.pmeta{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid #f1f5f9;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tabb{padding:9px 14px;background:none;border:none;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:500;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s}
+.tabb.active{font-weight:700;color:var(--indigo);border-bottom-color:var(--indigo)}
+.stabs{display:flex;border-bottom:1.5px solid #f1f5f9;margin-bottom:10px;overflow-x:auto}.stabs::-webkit-scrollbar{display:none}
+.stab{padding:7px 11px;background:none;border:none;cursor:pointer;font-size:11px;font-family:var(--font);font-weight:500;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.stab.active{color:var(--indigo);font-weight:700;border-bottom-color:var(--indigo)}
+
+/* DETAIL GRID */
+.dgrid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:650px){.dgrid{grid-template-columns:1fr 1fr}}
+@media(min-width:1000px){.dgrid{grid-template-columns:1fr 1fr 1fr}}
+.dc{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:14px}
+.dct{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px}
+.ir{display:flex;margin-bottom:7px;gap:4px;flex-wrap:wrap}
+.ik{font-size:11px;font-weight:600;color:var(--slate);min-width:100px;flex-shrink:0}
+.iv{font-size:11px;color:var(--navy)}.ivg{font-size:11px;color:var(--green);font-weight:700}
+.cs2{grid-column:1/-1}@media(min-width:1000px){.cs2{grid-column:span 2}}
+
+/* EDIT INLINE */
+.einput{border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;font-family:var(--font);outline:none;background:var(--white);min-width:80px;max-width:180px}
+.einput:focus{border-color:var(--indigo)}
+.eselect{border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;font-family:var(--font);outline:none;background:var(--white)}
+.eselect:focus{border-color:var(--indigo)}
+
+/* ALERT BOX */
+.abox{background:var(--rl);border:1px solid var(--rb);border-radius:9px;padding:12px;margin-bottom:10px}
+.at2{font-size:12px;font-weight:700;color:var(--red);margin-bottom:4px}
+.an2{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.am{font-size:11px;color:var(--muted)}
+.dlb{background:#eff6ff;border:none;border-radius:5px;width:26px;height:26px;cursor:pointer;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.dvd{border:none;border-top:1px solid var(--border);margin:10px 0}
+.smlbl{font-size:10px;font-weight:700;color:var(--muted2);margin-bottom:7px;letter-spacing:.04em;text-transform:uppercase}
+
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;background:#0008;z-index:500;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:600px){.mbg{align-items:center;padding:16px}}
+.mbg.show{display:flex}
+.modal{background:var(--white);border-radius:16px 16px 0 0;padding:22px 18px 32px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto}
+@media(min-width:600px){.modal{border-radius:16px;padding:24px}}
+.mtit{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:16px}
+.fg{margin-bottom:12px}.fl{font-size:11px;font-weight:700;color:var(--slate);display:block;margin-bottom:4px}
+.fi,.fsel{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font);outline:none;background:var(--white)}
+.fi:focus,.fsel:focus{border-color:var(--indigo)}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.mdrag{width:36px;height:4px;background:#e2e8f0;border-radius:9px;margin:0 auto 16px}
+
+/* LOGIN */
+#lscreen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:600;padding:16px}
+.lcard{background:var(--white);border-radius:18px;padding:28px 22px;width:100%;max-width:360px}
+.lerr{background:var(--rl);color:var(--red);border:1px solid var(--rb);border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:12px;display:none}
+.lbtn{width:100%;background:var(--indigo);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);margin-top:4px}
+.lbtn:hover{background:var(--indigo2)}
+
+/* USER ROW / LOG */
+.urow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #f1f5f9}
+.urow:last-child{border-bottom:none}
+.uravt{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+.urinf{flex:1;min-width:0}.urname{font-size:12px;font-weight:700;color:var(--navy)}.ursub{font-size:11px;color:var(--muted);margin-top:1px}
+.logrow{padding:8px 0;border-bottom:1px solid #f8fafc;font-size:11px;color:var(--navy3)}.logrow:last-child{border-bottom:none}.logt{font-size:10px;color:var(--muted2);margin-top:2px}
+
+/* STAT */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.scard{border-radius:10px;padding:12px;text-align:center}.snum{font-size:22px;font-weight:800}.slb{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:30px;font-size:12px;font-weight:600;z-index:999;transition:transform .3s ease;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- LOGIN -->
+<div id="lscreen">
+  <div class="lcard">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:22px">
+      <div class="logo-icon">🩸</div>
+      <div><div style="font-weight:800;font-size:16px;color:var(--navy)">CoagulCare</div><div style="font-size:11px;color:var(--muted)">Gestão de Pacientes Hematológicos</div></div>
+    </div>
+    <div id="lerr" class="lerr">CRM ou senha incorretos.</div>
+    <div class="fg"><label class="fl">CRM</label><input class="fi" id="lcrm" placeholder="Ex: 11707" inputmode="numeric"/></div>
+    <div class="fg"><label class="fl">Senha</label><input class="fi" id="lpass" type="password" placeholder="••••••••"/></div>
+    <button class="lbtn" onclick="doLogin()">Entrar</button>
+    <p style="font-size:10px;color:var(--muted2);text-align:center;margin-top:12px">Acesso restrito a profissionais autorizados</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div id="overlay" onclick="closeSB()"></div>
+  <aside id="sidebar">
+    <div class="logo-wrap">
+      <div class="logo-icon">🩸</div>
+      <div><div class="logo-name">CoagulCare</div><div class="logo-sub">Gestão de Pacientes</div></div>
+    </div>
+    <nav id="snav">
+      <button class="nb active" data-p="dashboard"><span class="ni">🏠</span>Dashboard</button>
+      <button class="nb" data-p="pacientes"><span class="ni">👤</span>Pacientes</button>
+      <button class="nb" data-p="exames"><span class="ni">🧪</span>Exames</button>
+      <button class="nb" data-p="medicacoes"><span class="ni">💊</span>Medicações</button>
+      <button class="nb" data-p="alertas"><span class="ni">🔔</span>Alertas<span class="adot">1</span></button>
+      <button class="nb" data-p="relatorios"><span class="ni">📊</span>Relatórios</button>
+      <div id="ng-wrap"></div>
+      <button class="nb" data-p="configuracoes"><span class="ni">⚙️</span>Configurações</button>
+    </nav>
+    <div class="sb-bot"><button class="nb" onclick="doLogout()"><span class="ni">🚪</span>Sair</button></div>
+    <div class="sb-user">
+      <div class="uav" id="sav">RC</div>
+      <div><div class="uname" id="sname">—</div><div class="urole" id="srole">—</div><span class="ubadge" id="sbadge">—</span></div>
+    </div>
+  </aside>
+
+  <div id="main">
+    <header id="topbar">
+      <button id="menu-toggle" onclick="toggleSB()">☰</button>
+      <div class="sw"><span class="si">🔍</span><input class="sinput" id="gsearch" placeholder="Buscar paciente..." oninput="filterT()"/></div>
+      <button class="bellb" onclick="nav('alertas')">🔔</button>
+    </header>
+    <div id="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <h1 class="ptitle">Dashboard</h1>
+        <div class="slbl">Categorias de Coagulopatias</div>
+        <div class="cat-grid">
+          <div class="catc" style="background:#eff6ff;border-color:#bfdbfe" onclick="nav('pacientes')"><div class="cati">💧</div><div class="catn" style="color:#2563eb">Hemofilia A</div><div class="cats">(Fator VIII)</div><div class="catct" id="cnt-hemA">— pacientes</div></div>
+          <div class="catc" style="background:#f0fdf4;border-color:#bbf7d0" onclick="nav('pacientes')"><div class="cati">🩸</div><div class="catn" style="color:#16a34a">Hemofilia B</div><div class="cats">(Fator IX)</div><div class="catct">12 pacientes</div></div>
+          <div class="catc" style="background:#faf5ff;border-color:#ddd6fe" onclick="nav('pacientes')"><div class="cati">🔬</div><div class="catn" style="color:#7c3aed">Von Willebrand</div><div class="catct">9 pacientes</div></div>
+          <div class="catc" style="background:#fffbeb;border-color:#fde68a" onclick="nav('pacientes')"><div class="cati">🧬</div><div class="catn" style="color:#d97706">Talassemia</div><div class="catct">15 pacientes</div></div>
+          <div class="catc" style="background:#fef2f2;border-color:#fecaca" onclick="nav('pacientes')"><div class="cati">🔴</div><div class="catn" style="color:#dc2626">An. Falciforme</div><div class="catct">20 pacientes</div></div>
+          <div class="catc" style="background:#ecfeff;border-color:#a5f3fc" onclick="nav('pacientes')"><div class="cati">🩺</div><div class="catn" style="color:#0891b2">Outras</div><div class="catct">8 pacientes</div></div>
+        </div>
+        <div class="slbl">Atalhos rápidos</div>
+        <div class="atl-grid">
+          <button class="atlb" id="btn-nd" onclick="openM('new-patient')"><span>👤</span>Novo Paciente</button>
+          <button class="atlb" onclick="nav('exames')"><span>🧪</span>Exames</button>
+          <button class="atlb" onclick="nav('alertas')"><span>🔔</span>Alertas</button>
+          <button class="atlb" onclick="nav('relatorios')"><span>📊</span>Relatórios</button>
+        </div>
+        <div class="slbl">Hemofilia A — Pacientes</div>
+        <div class="card">
+          <div class="chdr"><span class="ctitle">Pacientes recentes</span><button class="btnp" id="btn-nd2" onclick="openM('new-patient')">+ Novo</button></div>
+          <div class="cbody"><table><thead><tr><th>Nome</th><th>Nascimento</th><th>Classificação</th><th>Última Consulta</th><th>Ações</th></tr></thead><tbody id="t1"></tbody></table></div>
+          <div class="pag"><span class="pag-i" id="pi1"></span><div class="pag-b" id="pb1"></div></div>
+        </div>
+      </div>
+
+      <!-- PACIENTES -->
+      <div class="page" id="page-pacientes">
+        <h1 class="ptitle">Pacientes</h1>
+        <div class="card">
+          <div class="chdr"><span class="ctitle">Todos os Pacientes</span><button class="btnp" id="btn-np" onclick="openM('new-patient')">+ Novo</button></div>
+          <div class="cbody"><table><thead><tr><th>Nome</th><th>Nascimento</th><th>Classificação</th><th>Última Consulta</th><th>Ações</th></tr></thead><tbody id="t2"></tbody></table></div>
+          <div class="pag"><span class="pag-i" id="pi2"></span><div class="pag-b" id="pb2"></div></div>
+        </div>
+      </div>
+
+      <!-- DETALHE -->
+      <div class="page" id="page-detail"></div>
+
+      <!-- EXAMES -->
+      <div class="page" id="page-exames">
+        <h1 class="ptitle">Exames</h1>
+        <div id="exames-body"></div>
+      </div>
+
+      <!-- MEDICAÇÕES -->
+      <div class="page" id="page-medicacoes">
+        <h1 class="ptitle">Medicações</h1>
+        <div id="meds-body"></div>
+      </div>
+
+      <!-- ALERTAS -->
+      <div class="page" id="page-alertas">
+        <h1 class="ptitle">Alertas</h1>
+        <div class="card cpad"><div class="abox"><div class="at2">🚨 Exame vencido</div><div class="an2">Dosagem de Fator VIII — João Pedro da Silva</div><div class="am">Último: 24/01/2025 · Recomendado a cada 3 meses</div></div><p style="font-size:12px;color:var(--muted)">Nenhum outro alerta ativo.</p></div>
+      </div>
+
+      <!-- RELATÓRIOS -->
+      <div class="page" id="page-relatorios"><h1 class="ptitle">Relatórios</h1><div class="card cpad" id="relat-body"></div></div>
+
+      <!-- GESTORES -->
+      <div class="page" id="page-gestores">
+        <h1 class="ptitle">Gestão de Usuários</h1>
+        <div class="card cpad" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <span class="ctitle">Gestores cadastrados</span><button class="btnp" onclick="openM('new-gestor')">+ Novo Gestor</button>
+          </div>
+          <div id="glist"></div>
+        </div>
+        <div class="card cpad"><div class="ctitle" style="margin-bottom:12px">📋 Log de Atividades</div><div id="alog"></div></div>
+      </div>
+
+      <!-- CONFIGURAÇÕES -->
+      <div class="page" id="page-configuracoes"><h1 class="ptitle">Configurações</h1><div class="card cpad"><div id="cfg-body"></div></div></div>
+
+    </div>
+    <footer id="footer"><span>CoagulCare — Gestão Hematológica</span><span>v1.0.0</span></footer>
+  </div>
+</div>
+
+<!-- MODAL NOVO PACIENTE -->
+<div class="mbg" id="modal-new-patient">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">👤 Novo Paciente</div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Nome completo *</label><input class="fi" id="np-nome" placeholder="Nome do paciente"/></div>
+      <div class="fg"><label class="fl">Data de nascimento</label><input class="fi" id="np-nasc" type="date"/></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Sexo</label><select class="fsel" id="np-sexo"><option>Masculino</option><option>Feminino</option></select></div>
+      <div class="fg"><label class="fl">Prontuário</label><input class="fi" id="np-pront" placeholder="000000"/></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Coagulopatia</label><select class="fsel" id="np-coag"><option>Hemofilia A</option><option>Hemofilia B</option><option>Von Willebrand</option><option>Talassemia</option><option>An. Falciforme</option><option>Outra</option></select></div>
+      <div class="fg"><label class="fl">Classificação</label><select class="fsel" id="np-class"><option value="grave">Grave</option><option value="moderada">Moderada</option><option value="leve">Leve</option></select></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Telefone</label><input class="fi" id="np-tel" placeholder="(00) 00000-0000" inputmode="tel"/></div>
+      <div class="fg"><label class="fl">Responsável</label><input class="fi" id="np-resp" placeholder="Nome do responsável"/></div>
+    </div>
+    <div class="fg"><label class="fl">Observações</label><input class="fi" id="np-obs" placeholder="Observações clínicas..."/></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-patient')">Cancelar</button><button class="btnp" onclick="savePatient()">Salvar Paciente</button></div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PACIENTE -->
+<div class="mbg" id="modal-edit-patient">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">✏️ Editar Paciente</div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Nome completo</label><input class="fi" id="ep-nome" placeholder="Nome"/></div>
+      <div class="fg"><label class="fl">Data de nascimento</label><input class="fi" id="ep-nasc" type="date"/></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Sexo</label><select class="fsel" id="ep-sexo"><option>Masculino</option><option>Feminino</option></select></div>
+      <div class="fg"><label class="fl">Prontuário</label><input class="fi" id="ep-pront"/></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Coagulopatia</label><select class="fsel" id="ep-coag"><option>Hemofilia A</option><option>Hemofilia B</option><option>Von Willebrand</option><option>Talassemia</option><option>An. Falciforme</option><option>Outra</option></select></div>
+      <div class="fg"><label class="fl">Classificação</label><select class="fsel" id="ep-class"><option value="grave">Grave</option><option value="moderada">Moderada</option><option value="leve">Leve</option></select></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Telefone</label><input class="fi" id="ep-tel" inputmode="tel"/></div>
+      <div class="fg"><label class="fl">Responsável</label><input class="fi" id="ep-resp"/></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Profilaxia</label><select class="fsel" id="ep-prof"><option>Sim</option><option>Não</option></select></div>
+      <div class="fg"><label class="fl">Acesso Venoso</label><select class="fsel" id="ep-acesso"><option>Port-a-cath</option><option>Veia periférica</option><option>PICC</option><option>Outro</option></select></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Inibidor (Anticorpo)</label><select class="fsel" id="ep-inib"><option>Negativo</option><option>Positivo</option></select></div>
+      <div class="fg"><label class="fl">Última Consulta</label><input class="fi" id="ep-ultima" type="date"/></div>
+    </div>
+    <div class="fg"><label class="fl">Observações</label><input class="fi" id="ep-obs" placeholder="Observações clínicas..."/></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('edit-patient')">Cancelar</button><button class="btnp" onclick="updatePatient()">Salvar Alterações</button></div>
+  </div>
+</div>
+
+<!-- MODAL NOVO EXAME -->
+<div class="mbg" id="modal-new-exam">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">🧪 Novo Exame</div>
+    <div class="fg"><label class="fl">Tipo de Exame</label>
+      <select class="fsel" id="ne-tipo"><option>Dosagem de Fator VIII</option><option>Dosagem de Fator IX</option><option>Inibidor (Anticorpo)</option><option>Coagulograma</option><option>Hemograma</option><option>Outro</option></select>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Data da Coleta</label><input class="fi" id="ne-data" type="date"/></div>
+      <div class="fg"><label class="fl">Resultado</label><input class="fi" id="ne-res" placeholder="Ex: 2%, 12s, 0,4 BU"/></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Método</label><input class="fi" id="ne-met" placeholder="Ex: Cromogênico"/></div>
+      <div class="fg"><label class="fl">Laboratório</label><input class="fi" id="ne-lab" placeholder="Ex: Lab. Hemato"/></div>
+    </div>
+    <div class="fg"><label class="fl">Paciente</label>
+      <select class="fsel" id="ne-pac"></select>
+    </div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-exam')">Cancelar</button><button class="btnp" onclick="saveExam()">Salvar Exame</button></div>
+  </div>
+</div>
+
+<!-- MODAL NOVA MEDICAÇÃO -->
+<div class="mbg" id="modal-new-med">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">💊 Nova Medicação</div>
+    <div class="fg"><label class="fl">Medicação *</label><input class="fi" id="nm-nome" placeholder="Nome da medicação"/></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Dose</label><input class="fi" id="nm-dose" placeholder="Ex: 2500 UI"/></div>
+      <div class="fg"><label class="fl">Frequência</label><input class="fi" id="nm-freq" placeholder="Ex: 3x/sem"/></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Via</label><select class="fsel" id="nm-via"><option>IV</option><option>VO</option><option>SC</option><option>IM</option></select></div>
+      <div class="fg"><label class="fl">Data Início</label><input class="fi" id="nm-inicio" type="date"/></div>
+    </div>
+    <div class="fg"><label class="fl">Paciente</label><select class="fsel" id="nm-pac"></select></div>
+    <div class="fg"><label class="fl">Observações</label><input class="fi" id="nm-obs" placeholder="Observações..."/></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-med')">Cancelar</button><button class="btnp" onclick="saveMed()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL NOVO GESTOR -->
+<div class="mbg" id="modal-new-gestor">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">👥 Novo Gestor</div>
+    <div class="fg"><label class="fl">Nome completo</label><input class="fi" id="ng-nome" placeholder="Dr. Nome Sobrenome"/></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">CRM *</label><input class="fi" id="ng-crm" placeholder="00000" inputmode="numeric"/></div>
+      <div class="fg"><label class="fl">Especialidade</label><input class="fi" id="ng-esp" placeholder="Hematologia"/></div>
+    </div>
+    <div class="fg"><label class="fl">Senha inicial *</label><input class="fi" id="ng-pass" type="password" placeholder="••••••••"/></div>
+    <div class="fg"><label class="fl">Nível de acesso</label>
+      <select class="fsel" id="ng-role"><option value="gestor">Gestor (visualiza + edita via master)</option><option value="readonly">Somente leitura</option></select>
+    </div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-gestor')">Cancelar</button><button class="btnp" onclick="saveGestor()">Cadastrar</button></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR -->
+<div class="mbg" id="modal-confirm">
+  <div class="modal" style="max-width:340px">
+    <div class="mdrag"></div>
+    <div class="mtit">⚠️ Confirmar</div>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:16px" id="conf-msg">Tem certeza?</p>
+    <div class="mfoot"><button class="btno" onclick="closeM('confirm')">Cancelar</button><button class="btnd" id="conf-ok">Confirmar</button></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   STORAGE — tudo persiste no localStorage
+══════════════════════════════════ */
+const LS = {
+  get(k, def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; }},
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} },
+};
+
+/* Dados padrão */
+const DEFAULT_PATS = [
+  {id:1,nome:"João Pedro da Silva",nasc:"12/05/2008",nascISO:"2008-05-12",idade:16,pront:"000123",tipo:"grave",ultima:"24/04/2025",ultimaISO:"2025-04-24",sexo:"Masculino",coag:"Hemofilia A",prof:"Sim",acesso:"Port-a-cath",inib:"Negativo",obs:"Estável em profilaxia com fator VIII.",resp:"Maria da Silva",tel:"(11) 99999-9999"},
+  {id:2,nome:"Lucas Almeida Santos",nasc:"03/09/2010",nascISO:"2010-09-03",idade:14,pront:"000124",tipo:"moderada",ultima:"18/04/2025",ultimaISO:"2025-04-18",sexo:"Masculino",coag:"Hemofilia A",prof:"Sim",acesso:"Veia periférica",inib:"Negativo",obs:"Acompanhamento regular.",resp:"Ana Almeida",tel:"(11) 88888-8888"},
+  {id:3,nome:"Mateus Rodrigues",nasc:"21/11/2012",nascISO:"2012-11-21",idade:12,pront:"000125",tipo:"leve",ultima:"10/04/2025",ultimaISO:"2025-04-10",sexo:"Masculino",coag:"Hemofilia A",prof:"Não",acesso:"Veia periférica",inib:"Negativo",obs:"Estável.",resp:"Carlos Rodrigues",tel:"(11) 77777-7777"},
+  {id:4,nome:"Gustavo Pereira",nasc:"15/02/2007",nascISO:"2007-02-15",idade:18,pront:"000126",tipo:"grave",ultima:"02/04/2025",ultimaISO:"2025-04-02",sexo:"Masculino",coag:"Hemofilia A",prof:"Sim",acesso:"Port-a-cath",inib:"Negativo",obs:"Transição adulto.",resp:"Paulo Pereira",tel:"(11) 66666-6666"},
+  {id:5,nome:"Rafael Lima",nasc:"28/07/2011",nascISO:"2011-07-28",idade:13,pront:"000127",tipo:"moderada",ultima:"28/03/2025",ultimaISO:"2025-03-28",sexo:"Masculino",coag:"Hemofilia A",prof:"Sim",acesso:"Veia periférica",inib:"Negativo",obs:"Sem intercorrências.",resp:"Fernanda Lima",tel:"(11) 55555-5555"},
+];
+const DEFAULT_EXAMES = [
+  {id:1,pacId:1,tipo:"Dosagem de Fator VIII",data:"24/04/2025",dataISO:"2025-04-24",res:"2%",met:"Cromogênico",lab:"Lab. Hemato"},
+  {id:2,pacId:1,tipo:"Dosagem de Fator VIII",data:"10/01/2025",dataISO:"2025-01-10",res:"<1%",met:"Cromogênico",lab:"Lab. Hemato"},
+  {id:3,pacId:1,tipo:"Dosagem de Fator VIII",data:"05/09/2024",dataISO:"2024-09-05",res:"1%",met:"Cromogênico",lab:"Lab. Hemato"},
+  {id:4,pacId:1,tipo:"Dosagem de Fator VIII",data:"12/05/2024",dataISO:"2024-05-12",res:"2%",met:"Cromogênico",lab:"Lab. Hemato"},
+];
+const DEFAULT_MEDS = [
+  {id:1,pacId:1,nome:"Fator VIII Recombinante",dose:"2500 UI",freq:"3x/sem",via:"IV",inicio:"15/01/2024",inicioISO:"2024-01-15",situacao:"Em uso",obs:"Profilaxia primária"},
+  {id:2,pacId:1,nome:"Ácido Tranexâmico",dose:"500 mg",freq:"2x/dia",via:"VO",inicio:"15/02/2024",inicioISO:"2024-02-15",situacao:"Em uso",obs:"Sangramento gengival"},
+  {id:3,pacId:1,nome:"Vitamina D",dose:"2000 UI",freq:"1x/dia",via:"VO",inicio:"01/03/2024",inicioISO:"2024-03-01",situacao:"Em uso",obs:"Suplementação"},
+  {id:4,pacId:1,nome:"Paracetamol",dose:"500 mg",freq:"S.n.",via:"VO",inicio:"10/02/2024",inicioISO:"2024-02-10",situacao:"Em uso",obs:"Dor leve"},
+];
+const DEFAULT_USERS = [
+  {crm:"11707",nome:"Dr. Rodrigo Cahuana Chipayo",role:"master",esp:"Hematologia",pass:"master123",av:"RC"},
+];
+
+/* Carrega ou inicializa */
+if(!localStorage.getItem('cg_pats')) LS.set('cg_pats', DEFAULT_PATS);
+if(!localStorage.getItem('cg_exames')) LS.set('cg_exames', DEFAULT_EXAMES);
+if(!localStorage.getItem('cg_meds')) LS.set('cg_meds', DEFAULT_MEDS);
+if(!localStorage.getItem('cg_users')) LS.set('cg_users', DEFAULT_USERS);
+if(!localStorage.getItem('cg_log')) LS.set('cg_log', []);
+
+function getPats(){ return LS.get('cg_pats', DEFAULT_PATS); }
+function setPats(v){ LS.set('cg_pats',v); }
+function getExames(){ return LS.get('cg_exames', DEFAULT_EXAMES); }
+function setExames(v){ LS.set('cg_exames',v); }
+function getMeds(){ return LS.get('cg_meds', DEFAULT_MEDS); }
+function setMeds(v){ LS.set('cg_meds',v); }
+function getUsers(){ return LS.get('cg_users', DEFAULT_USERS); }
+function setUsers(v){ LS.set('cg_users',v); }
+function getLog(){ return LS.get('cg_log', []); }
+function addLog(a){ const l=getLog(); const n=new Date(); l.push({user:CU?CU.nome:'—',action:a,time:n.toLocaleDateString('pt-BR')+' '+n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}); LS.set('cg_log',l); }
+
+/* Helpers de data */
+function isoToBR(iso){ if(!iso)return'—'; const[y,m,d]=iso.split('-'); return`${d}/${m}/${y}`; }
+function brToISO(br){ if(!br||!br.includes('/'))return''; const[d,m,y]=br.split('/'); return`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`; }
+function calcIdade(nascISO){ if(!nascISO)return 0; return new Date().getFullYear()-new Date(nascISO).getFullYear(); }
+
+let CU=null, pg1=1, pg2=1, PS=5, AP=null, DT='resumo', editingPatId=null;
+
+/* ══ TOAST ══ */
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+/* ══ LOGIN ══ */
+function doLogin(){
+  const crm=document.getElementById('lcrm').value.trim();
+  const pass=document.getElementById('lpass').value;
+  const users=getUsers();
+  const u=users.find(u=>u.crm===crm&&u.pass===pass);
+  if(!u){document.getElementById('lerr').style.display='block';return;}
+  CU=u;
+  document.getElementById('lscreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  setupUI(); addLog('Login realizado'); renderT1(); renderT2(); updateCatCount();
+}
+function doLogout(){ addLog('Logout'); CU=null; document.getElementById('app').style.display='none'; document.getElementById('lscreen').style.display='flex'; document.getElementById('lcrm').value=''; document.getElementById('lpass').value=''; document.getElementById('lerr').style.display='none'; }
+document.getElementById('lpass').addEventListener('keydown',e=>{ if(e.key==='Enter')doLogin(); });
+
+function setupUI(){
+  document.getElementById('sname').textContent=CU.nome;
+  document.getElementById('srole').textContent=CU.esp;
+  document.getElementById('sav').textContent=CU.av||CU.nome[0];
+  const b=document.getElementById('sbadge'); b.textContent=CU.role==='master'?'Gestor Master':'Gestor'; b.style.background=CU.role==='master'?'#f59e0b':'#6366f1';
+  document.getElementById('ng-wrap').innerHTML=CU.role==='master'?'<button class="nb" data-p="gestores"><span class="ni">👥</span>Gestores</button>':'';
+  const canEdit=CU.role==='master';
+  ['btn-nd','btn-nd2','btn-np'].forEach(id=>{ const e=document.getElementById(id); if(e)e.style.display=canEdit?'':'none'; });
+}
+function updateCatCount(){ const p=getPats(); document.getElementById('cnt-hemA').textContent=p.filter(x=>x.coag==='Hemofilia A').length+' pacientes'; }
+
+/* ══ SIDEBAR ══ */
+function toggleSB(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
+function closeSB(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+
+/* ══ NAV ══ */
+function nav(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
+  const pe=document.getElementById('page-'+p); if(pe)pe.classList.add('active');
+  const ne=document.querySelector(`[data-p="${p}"]`); if(ne)ne.classList.add('active');
+  if(p==='pacientes')renderT2();
+  if(p==='gestores')renderGestores();
+  if(p==='relatorios')renderRelat();
+  if(p==='configuracoes')renderCfg();
+  if(p==='exames')renderExamesPage();
+  if(p==='medicacoes')renderMedsPage();
+  closeSB();
+}
+document.getElementById('snav').addEventListener('click',e=>{ const b=e.target.closest('.nb'); if(b&&b.dataset.p)nav(b.dataset.p); });
+
+/* ══ BADGES ══ */
+const BC=t=>t==='grave'?'bg2':t==='moderada'?'bm':'bl';
+const BL=t=>t==='grave'?'Hemofilia A Grave':t==='moderada'?'Hemofilia A Moderada':'Hemofilia A Leve';
+const BK=t=>t==='grave'?'#dc2626':t==='moderada'?'#ea580c':'#16a34a';
+
+/* ══ TABLES ══ */
+function filterT(){ pg1=1; renderT1(); }
+function filt(){ const q=(document.getElementById('gsearch').value||'').toLowerCase(); return q?getPats().filter(p=>p.nome.toLowerCase().includes(q)):getPats(); }
+function renderT1(){
+  const d=filt(),tot=d.length,tp=Math.ceil(tot/PS)||1;
+  if(pg1>tp)pg1=tp;
+  const sl=d.slice((pg1-1)*PS,pg1*PS);
+  document.getElementById('t1').innerHTML=sl.map(p=>rRow(p)).join('');
+  document.getElementById('pi1').textContent=`1-${sl.length} de ${tot}`;
+  rPag('pb1',tp,pg1,n=>{pg1=n;renderT1();});
+}
+function renderT2(){
+  const d=getPats(),tot=d.length,tp=Math.ceil(tot/PS)||1;
+  if(pg2>tp)pg2=tp;
+  const sl=d.slice((pg2-1)*PS,pg2*PS);
+  document.getElementById('t2').innerHTML=sl.map(p=>rRow(p)).join('');
+  document.getElementById('pi2').textContent=`1-${sl.length} de ${tot}`;
+  rPag('pb2',tp,pg2,n=>{pg2=n;renderT2();});
+}
+function rRow(p){
+  const e=CU&&CU.role==='master';
+  return`<tr>
+    <td style="font-weight:600;white-space:nowrap">${p.nome}</td>
+    <td style="white-space:nowrap">${p.nasc}</td>
+    <td><span class="badge ${BC(p.tipo)}">${BL(p.tipo)}</span></td>
+    <td style="white-space:nowrap">${p.ultima}</td>
+    <td><div class="acc">
+      <button class="ab av2" title="Ver" onclick="openDet(${p.id})">👁</button>
+      ${e?`<button class="ab ae" title="Editar" onclick="openEditPat(${p.id})">✏️</button>`:''}
+      ${e?`<button class="ab adel" title="Excluir" onclick="confDel(${p.id})">🗑</button>`:''}
+    </div></td>
+  </tr>`;
+}
+function rPag(id,tot,cur,cb){
+  let h='';
+  for(let i=1;i<=tot;i++) h+=`<button class="pb${i===cur?' on':''}" onclick="(${cb.toString()})(${i})">${i}</button>`;
+  h+=`<button class="pb" onclick="(${cb.toString()})(${Math.min(tot,cur+1)})">›</button>`;
+  document.getElementById(id).innerHTML=h;
+}
+
+/* ══ NOVO PACIENTE ══ */
+function savePatient(){
+  const nome=document.getElementById('np-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o nome do paciente.');return;}
+  const nascISO=document.getElementById('np-nasc').value;
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const hojeISO=new Date().toISOString().split('T')[0];
+  const pats=getPats();
+  pats.push({
+    id:Date.now(), nome, nasc:nascISO?isoToBR(nascISO):'—', nascISO,
+    idade:calcIdade(nascISO), pront:document.getElementById('np-pront').value||'—',
+    tipo:document.getElementById('np-class').value,
+    ultima:hoje, ultimaISO:hojeISO,
+    sexo:document.getElementById('np-sexo').value,
+    coag:document.getElementById('np-coag').value,
+    prof:'Não', acesso:'Veia periférica', inib:'Negativo',
+    obs:document.getElementById('np-obs').value||'Novo paciente cadastrado.',
+    resp:document.getElementById('np-resp').value||'—',
+    tel:document.getElementById('np-tel').value||'—'
+  });
+  setPats(pats);
+  addLog(`Paciente cadastrado: ${nome}`);
+  closeM('new-patient'); renderT1(); renderT2(); updateCatCount();
+  ['np-nome','np-nasc','np-pront','np-tel','np-resp','np-obs'].forEach(id=>document.getElementById(id).value='');
+  toast('✅ Paciente cadastrado com sucesso!');
+}
+
+/* ══ EDITAR PACIENTE ══ */
+function openEditPat(id){
+  const p=getPats().find(x=>x.id===id); if(!p)return;
+  editingPatId=id;
+  document.getElementById('ep-nome').value=p.nome;
+  document.getElementById('ep-nasc').value=p.nascISO||'';
+  document.getElementById('ep-sexo').value=p.sexo;
+  document.getElementById('ep-pront').value=p.pront;
+  document.getElementById('ep-coag').value=p.coag;
+  document.getElementById('ep-class').value=p.tipo;
+  document.getElementById('ep-tel').value=p.tel;
+  document.getElementById('ep-resp').value=p.resp;
+  document.getElementById('ep-prof').value=p.prof;
+  document.getElementById('ep-acesso').value=p.acesso;
+  document.getElementById('ep-inib').value=p.inib;
+  document.getElementById('ep-ultima').value=p.ultimaISO||'';
+  document.getElementById('ep-obs').value=p.obs;
+  openM('edit-patient');
+}
+function updatePatient(){
+  if(!editingPatId)return;
+  const pats=getPats();
+  const i=pats.findIndex(x=>x.id===editingPatId); if(i<0)return;
+  const nascISO=document.getElementById('ep-nasc').value;
+  const ultimaISO=document.getElementById('ep-ultima').value;
+  pats[i]={...pats[i],
+    nome:document.getElementById('ep-nome').value,
+    nasc:nascISO?isoToBR(nascISO):pats[i].nasc, nascISO,
+    idade:calcIdade(nascISO),
+    pront:document.getElementById('ep-pront').value,
+    tipo:document.getElementById('ep-class').value,
+    sexo:document.getElementById('ep-sexo').value,
+    coag:document.getElementById('ep-coag').value,
+    tel:document.getElementById('ep-tel').value,
+    resp:document.getElementById('ep-resp').value,
+    prof:document.getElementById('ep-prof').value,
+    acesso:document.getElementById('ep-acesso').value,
+    inib:document.getElementById('ep-inib').value,
+    ultima:ultimaISO?isoToBR(ultimaISO):pats[i].ultima, ultimaISO,
+    obs:document.getElementById('ep-obs').value,
+  };
+  setPats(pats);
+  addLog(`Paciente editado: ${pats[i].nome}`);
+  closeM('edit-patient'); renderT1(); renderT2(); updateCatCount();
+  // Se estiver na tela de detalhe, atualiza
+  if(AP&&AP.id===editingPatId){ AP=pats[i]; buildDet(); }
+  toast('✅ Paciente atualizado!');
+}
+
+/* ══ EXCLUIR PACIENTE ══ */
+function confDel(id){
+  const p=getPats().find(x=>x.id===id); if(!p)return;
+  document.getElementById('conf-msg').textContent=`Excluir o paciente "${p.nome}"? Esta ação não pode ser desfeita.`;
+  document.getElementById('conf-ok').onclick=()=>{ delPat(id); closeM('confirm'); };
+  openM('confirm');
+}
+function delPat(id){
+  const pats=getPats(); const p=pats.find(x=>x.id===id);
+  setPats(pats.filter(x=>x.id!==id));
+  // Remove exames e meds do paciente também
+  setExames(getExames().filter(x=>x.pacId!==id));
+  setMeds(getMeds().filter(x=>x.pacId!==id));
+  addLog(`Paciente excluído: ${p?p.nome:id}`);
+  renderT1(); renderT2(); updateCatCount();
+  toast('🗑 Paciente excluído.');
+}
+
+/* ══ DETALHE PACIENTE ══ */
+function openDet(id){ AP=getPats().find(p=>p.id===id); DT='resumo'; buildDet(); nav('detail'); }
+function buildDet(){
+  const p=AP; const e=CU&&CU.role==='master';
+  document.getElementById('page-detail').innerHTML=`<div style="padding:16px 14px">
+    <div class="dhdr">
+      <div class="dleft">
+        <button class="backb" onclick="nav('dashboard')">←</button>
+        <div>
+          <h1 class="ptit">${p.nome}</h1>
+          <div class="pmeta">${p.nasc} (${p.idade} anos) · ${p.pront} · <span style="color:${BK(p.tipo)};font-weight:700">${BL(p.tipo)}</span></div>
+        </div>
+      </div>
+      ${e?`<button class="btno" onclick="openEditPat(${p.id})">✏️ Editar</button>`:`<span class="badge bgestor">Somente leitura</span>`}
+    </div>
+    <div class="tabs">
+      <button class="tabb${DT==='resumo'?' active':''}" onclick="swTab('resumo')">Resumo</button>
+      <button class="tabb${DT==='exames'?' active':''}" onclick="swTab('exames')">Exames</button>
+      <button class="tabb${DT==='medicacoes'?' active':''}" onclick="swTab('medicacoes')">Medicações</button>
+      <button class="tabb${DT==='alertas'?' active':''}" onclick="swTab('alertas')">Alertas</button>
+    </div>
+    <div id="tcon"></div>
+  </div>`;
+  rTab();
+}
+function swTab(t){ DT=t; buildDet(); }
+function rTab(){
+  const p=AP; const el=document.getElementById('tcon'); if(!el)return;
+  const ex=getExames().filter(x=>x.pacId===p.id);
+  const meds=getMeds().filter(x=>x.pacId===p.id);
+  const e=CU&&CU.role==='master';
+  if(DT==='resumo'){
+    el.innerHTML=`<div class="dgrid">
+      <div class="dc">
+        <div class="dct">Informações Gerais</div>
+        ${ir('Nascimento',`${p.nasc} (${p.idade}a)`)}${ir('Sexo',p.sexo)}${ir('Coagulopatia',p.coag)}
+        ${ir('Classificação',BL(p.tipo).replace('Hemofilia A ',''))}${ir('Prontuário',p.pront)}
+        ${ir('Telefone',p.tel)}${ir('Responsável',p.resp)}
+      </div>
+      <div class="dc">
+        <div class="dct">Resumo Clínico</div>
+        ${ir('Última Consulta',p.ultima)}${ir('Profilaxia',p.prof)}${ir('Acesso Venoso',p.acesso)}
+        <div class="ir"><span class="ik">Inibidor:</span><span class="${p.inib==='Negativo'?'ivg':'iv'}">${p.inib}</span></div>
+        <div style="margin-top:7px"><span class="ik" style="display:block;margin-bottom:3px">Obs.:</span><span class="iv">${p.obs}</span></div>
+      </div>
+      <div class="dc">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><span>🔔</span><span style="font-size:11px;font-weight:700;color:#f59e0b">${ex.length>0?'Exames registrados':'Sem alertas ativos'}</span></div>
+        <div class="abox"><div class="at2">Exame vencido</div><div class="an2">Dosagem de Fator VIII</div><div class="am">Verificar periodicidade dos exames</div></div>
+        ${e?`<button class="btnp" style="width:100%;margin-top:8px;font-size:11px" onclick="openNewExamFor(${p.id})">+ Novo Exame</button>`:''}
+      </div>
+      <div class="dc cs2">
+        <div class="dct">Exames (${ex.length})</div>
+        ${ex.length?`<div style="overflow-x:auto"><table><thead><tr><th>Tipo</th><th>Data</th><th>Resultado</th><th>Método</th><th>Lab.</th>${e?'<th></th>':''}</tr></thead>
+        <tbody>${ex.map(x=>`<tr><td>${x.tipo}</td><td>${x.data}</td><td>${x.res}</td><td>${x.met}</td><td>${x.lab}</td>${e?`<td><button class="ab adel" onclick="delExame(${x.id})">🗑</button></td>`:''}</tr>`).join('')}</tbody>
+        </table></div>`:'<p style="font-size:12px;color:var(--muted)">Nenhum exame registrado.</p>'}
+        ${e?`<button class="btno" style="margin-top:10px;font-size:11px" onclick="openNewExamFor(${p.id})">+ Adicionar Exame</button>`:''}
+      </div>
+      <div class="dc" style="grid-column:1/-1">
+        <div class="dct">Medicações (${meds.length})</div>
+        ${meds.length?`<div style="overflow-x:auto"><table><thead><tr><th>Medicação</th><th>Dose</th><th>Freq.</th><th>Via</th><th>Início</th><th>Sit.</th><th>Obs.</th>${e?'<th></th>':''}</tr></thead>
+        <tbody>${meds.map(m=>`<tr><td style="font-weight:600">${m.nome}</td><td>${m.dose}</td><td>${m.freq}</td><td>${m.via}</td><td>${m.inicio}</td><td><span class="badge bu">${m.situacao}</span></td><td style="color:var(--muted)">${m.obs}</td>${e?`<td><button class="ab adel" onclick="delMed(${m.id})">🗑</button></td>`:''}</tr>`).join('')}</tbody>
+        </table></div>`:'<p style="font-size:12px;color:var(--muted)">Nenhuma medicação registrada.</p>'}
+        ${e?`<button class="btno" style="margin-top:10px;font-size:11px" onclick="openNewMedFor(${p.id})">+ Adicionar Medicação</button>`:''}
+      </div>
+    </div>`;
+  } else if(DT==='exames'){
+    el.innerHTML=`<div class="dc">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+        <div class="dct" style="margin-bottom:0">Exames de ${p.nome}</div>
+        ${e?`<button class="btnp" style="font-size:11px" onclick="openNewExamFor(${p.id})">+ Novo Exame</button>`:''}
+      </div>
+      ${ex.length?`<div style="overflow-x:auto"><table><thead><tr><th>Tipo</th><th>Data</th><th>Resultado</th><th>Método</th><th>Lab.</th>${e?'<th></th>':''}</tr></thead>
+      <tbody>${ex.map(x=>`<tr><td>${x.tipo}</td><td>${x.data}</td><td>${x.res}</td><td>${x.met}</td><td>${x.lab}</td>${e?`<td><button class="ab adel" onclick="delExame(${x.id});swTab('exames')">🗑</button></td>`:''}</tr>`).join('')}</tbody>
+      </table></div>`:'<p style="font-size:12px;color:var(--muted)">Nenhum exame registrado.</p>'}
+    </div>`;
+  } else if(DT==='medicacoes'){
+    el.innerHTML=`<div class="dc">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+        <div class="dct" style="margin-bottom:0">Medicações de ${p.nome}</div>
+        ${e?`<button class="btnp" style="font-size:11px" onclick="openNewMedFor(${p.id})">+ Nova Medicação</button>`:''}
+      </div>
+      ${meds.length?`<div style="overflow-x:auto"><table><thead><tr><th>Medicação</th><th>Dose</th><th>Freq.</th><th>Via</th><th>Início</th><th>Sit.</th><th>Obs.</th>${e?'<th></th>':''}</tr></thead>
+      <tbody>${meds.map(m=>`<tr><td style="font-weight:600">${m.nome}</td><td>${m.dose}</td><td>${m.freq}</td><td>${m.via}</td><td>${m.inicio}</td><td><span class="badge bu">${m.situacao}</span></td><td style="color:var(--muted)">${m.obs}</td>${e?`<td><button class="ab adel" onclick="delMed(${m.id});swTab('medicacoes')">🗑</button></td>`:''}</tr>`).join('')}</tbody>
+      </table></div>`:'<p style="font-size:12px;color:var(--muted)">Nenhuma medicação registrada.</p>'}
+    </div>`;
+  } else {
+    el.innerHTML=`<div class="dc"><div class="abox"><div class="at2">🚨 Exame vencido</div><div class="an2">Dosagem de Fator VIII</div><div class="am">Verificar periodicidade dos exames</div></div></div>`;
+  }
+}
+function ir(k,v){ return`<div class="ir"><span class="ik">${k}:</span><span class="iv">${v}</span></div>`; }
+
+/* ══ EXAMES PAGE ══ */
+function renderExamesPage(){
+  const ex=getExames(); const pats=getPats(); const e=CU&&CU.role==='master';
+  document.getElementById('exames-body').innerHTML=`
+    <div class="card">
+      <div class="chdr"><span class="ctitle">Todos os Exames (${ex.length})</span>
+        ${e?`<button class="btnp" onclick="openM('new-exam');fillPacSel('ne-pac')">+ Novo Exame</button>`:''}
+      </div>
+      <div class="cbody">
+        <table><thead><tr><th>Paciente</th><th>Tipo</th><th>Data</th><th>Resultado</th><th>Método</th><th>Lab.</th>${e?'<th></th>':''}</tr></thead>
+        <tbody>${ex.length?ex.map(x=>{const pat=pats.find(p=>p.id===x.pacId);return`<tr>
+          <td style="font-weight:600;white-space:nowrap">${pat?pat.nome:'—'}</td>
+          <td>${x.tipo}</td><td style="white-space:nowrap">${x.data}</td><td>${x.res}</td><td>${x.met}</td><td>${x.lab}</td>
+          ${e?`<td><button class="ab adel" onclick="delExame(${x.id});renderExamesPage()">🗑</button></td>`:''}
+        </tr>`;}).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Nenhum exame registrado.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* ══ MEDS PAGE ══ */
+function renderMedsPage(){
+  const meds=getMeds(); const pats=getPats(); const e=CU&&CU.role==='master';
+  document.getElementById('meds-body').innerHTML=`
+    <div class="card">
+      <div class="chdr"><span class="ctitle">Todas as Medicações (${meds.length})</span>
+        ${e?`<button class="btnp" onclick="openM('new-med');fillPacSel('nm-pac')">+ Nova Medicação</button>`:''}
+      </div>
+      <div class="cbody">
+        <table><thead><tr><th>Paciente</th><th>Medicação</th><th>Dose</th><th>Freq.</th><th>Via</th><th>Início</th><th>Sit.</th><th>Obs.</th>${e?'<th></th>':''}</tr></thead>
+        <tbody>${meds.length?meds.map(m=>{const pat=pats.find(p=>p.id===m.pacId);return`<tr>
+          <td style="font-weight:600;white-space:nowrap">${pat?pat.nome:'—'}</td>
+          <td style="font-weight:600">${m.nome}</td><td>${m.dose}</td><td>${m.freq}</td><td>${m.via}</td><td>${m.inicio}</td>
+          <td><span class="badge bu">${m.situacao}</span></td><td style="color:var(--muted)">${m.obs}</td>
+          ${e?`<td><button class="ab adel" onclick="delMed(${m.id});renderMedsPage()">🗑</button></td>`:''}
+        </tr>`;}).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Nenhuma medicação registrada.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* ══ NOVO EXAME ══ */
+function openNewExamFor(pacId){
+  fillPacSel('ne-pac');
+  document.getElementById('ne-pac').value=pacId;
+  openM('new-exam');
+}
+function fillPacSel(selId){
+  const sel=document.getElementById(selId); if(!sel)return;
+  sel.innerHTML=getPats().map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
+}
+function saveExam(){
+  const tipo=document.getElementById('ne-tipo').value;
+  const dataISO=document.getElementById('ne-data').value;
+  const res=document.getElementById('ne-res').value.trim();
+  const pacId=parseInt(document.getElementById('ne-pac').value);
+  if(!dataISO||!res){toast('⚠️ Preencha data e resultado.');return;}
+  const exames=getExames();
+  exames.push({id:Date.now(),pacId,tipo,data:isoToBR(dataISO),dataISO,res,met:document.getElementById('ne-met').value||'—',lab:document.getElementById('ne-lab').value||'—'});
+  setExames(exames);
+  addLog(`Exame cadastrado: ${tipo} para paciente ID ${pacId}`);
+  closeM('new-exam'); toast('✅ Exame salvo!');
+  ['ne-data','ne-res','ne-met','ne-lab'].forEach(id=>document.getElementById(id).value='');
+  renderExamesPage();
+  if(AP&&AP.id===pacId) rTab();
+}
+function delExame(id){
+  const ex=getExames(); const x=ex.find(e=>e.id===id);
+  setExames(ex.filter(e=>e.id!==id));
+  addLog(`Exame excluído: ${x?x.tipo:id}`);
+  toast('🗑 Exame excluído.'); renderExamesPage();
+  if(AP) rTab();
+}
+
+/* ══ NOVA MED ══ */
+function openNewMedFor(pacId){
+  fillPacSel('nm-pac');
+  document.getElementById('nm-pac').value=pacId;
+  openM('new-med');
+}
+function saveMed(){
+  const nome=document.getElementById('nm-nome').value.trim();
+  const pacId=parseInt(document.getElementById('nm-pac').value);
+  if(!nome){toast('⚠️ Informe o nome da medicação.');return;}
+  const inicioISO=document.getElementById('nm-inicio').value;
+  const meds=getMeds();
+  meds.push({id:Date.now(),pacId,nome,dose:document.getElementById('nm-dose').value||'—',freq:document.getElementById('nm-freq').value||'—',via:document.getElementById('nm-via').value,inicio:inicioISO?isoToBR(inicioISO):'—',inicioISO,situacao:'Em uso',obs:document.getElementById('nm-obs').value||'—'});
+  setMeds(meds);
+  addLog(`Medicação cadastrada: ${nome} para paciente ID ${pacId}`);
+  closeM('new-med'); toast('✅ Medicação salva!');
+  ['nm-nome','nm-dose','nm-freq','nm-inicio','nm-obs'].forEach(id=>document.getElementById(id).value='');
+  renderMedsPage();
+  if(AP&&AP.id===pacId) rTab();
+}
+function delMed(id){
+  const meds=getMeds(); const m=meds.find(x=>x.id===id);
+  setMeds(meds.filter(x=>x.id!==id));
+  addLog(`Medicação excluída: ${m?m.nome:id}`);
+  toast('🗑 Medicação excluída.'); renderMedsPage();
+  if(AP) rTab();
+}
+
+/* ══ GESTORES ══ */
+function renderGestores(){
+  const users=getUsers(); const others=users.filter(u=>u.crm!=='11707');
+  document.getElementById('glist').innerHTML=others.length
+    ?others.map(u=>`<div class="urow">
+        <div class="uravt">${(u.av||u.nome[0]).substring(0,2)}</div>
+        <div class="urinf"><div class="urname">${u.nome}</div><div class="ursub">CRM: ${u.crm} · ${u.esp}</div>
+          <span class="badge ${u.role==='gestor'?'bgestor':'bl'}" style="margin-top:3px">${u.role==='gestor'?'Gestor':'Somente leitura'}</span>
+        </div>
+        <button class="btnd" style="font-size:11px;padding:6px 10px" onclick="confRemG('${u.crm}')">Remover</button>
+      </div>`).join('')
+    :'<p style="font-size:12px;color:var(--muted)">Nenhum gestor cadastrado.</p>';
+  const log=getLog();
+  document.getElementById('alog').innerHTML=[...log].reverse().slice(0,25).map(l=>`<div class="logrow"><span style="font-weight:700">${l.user}</span> — ${l.action}<div class="logt">${l.time}</div></div>`).join('')||'<p style="font-size:12px;color:var(--muted)">Sem atividades.</p>';
+}
+function confRemG(crm){
+  const u=getUsers().find(u=>u.crm===crm); if(!u)return;
+  document.getElementById('conf-msg').textContent=`Remover ${u.nome} (CRM ${u.crm})?`;
+  document.getElementById('conf-ok').onclick=()=>{const users=getUsers();const i=users.findIndex(u=>u.crm===crm);if(i>-1){addLog(`Gestor removido: ${users[i].nome}`);users.splice(i,1);setUsers(users);}renderGestores();closeM('confirm');toast('Gestor removido.');};
+  openM('confirm');
+}
+function saveGestor(){
+  const nome=document.getElementById('ng-nome').value.trim();
+  const crm=document.getElementById('ng-crm').value.trim();
+  const pass=document.getElementById('ng-pass').value;
+  if(!nome||!crm||!pass){toast('⚠️ Preencha todos os campos.');return;}
+  const users=getUsers();
+  if(users.find(u=>u.crm===crm)){toast('⚠️ CRM já cadastrado.');return;}
+  users.push({crm,nome,role:document.getElementById('ng-role').value,esp:document.getElementById('ng-esp').value||'Hematologia',pass,av:nome.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()});
+  setUsers(users);
+  addLog(`Gestor cadastrado: ${nome} (CRM ${crm})`);
+  closeM('new-gestor'); renderGestores(); toast('✅ Gestor cadastrado!');
+  ['ng-nome','ng-crm','ng-esp','ng-pass'].forEach(id=>document.getElementById(id).value='');
+}
+
+/* ══ RELATÓRIOS ══ */
+function renderRelat(){
+  const isMaster=CU&&CU.role==='master'; const pats=getPats();
+  document.getElementById('relat-body').innerHTML=`
+    <div class="dct">📊 Relatórios</div>
+    <div style="display:grid;gap:10px;margin-top:10px">
+      <button class="atlb" onclick="exportCSV()"><span style="font-size:18px">📋</span><div><div style="font-weight:700;font-size:12px">Exportar Pacientes CSV</div><div style="font-size:10px;color:var(--muted)">Lista completa de pacientes</div></div></button>
+      <button class="atlb" onclick="exportExamesCSV()"><span style="font-size:18px">🧪</span><div><div style="font-weight:700;font-size:12px">Exportar Exames CSV</div><div style="font-size:10px;color:var(--muted)">${getExames().length} exames registrados</div></div></button>
+      <button class="atlb" onclick="exportMedsCSV()"><span style="font-size:18px">💊</span><div><div style="font-weight:700;font-size:12px">Exportar Medicações CSV</div><div style="font-size:10px;color:var(--muted)">${getMeds().length} medicações registradas</div></div></button>
+      <button class="atlb" onclick="exportLog()"><span style="font-size:18px">📝</span><div><div style="font-weight:700;font-size:12px">Log de Atividades</div><div style="font-size:10px;color:var(--muted)">Histórico do sistema</div></div></button>
+      ${isMaster?`<button class="atlb" onclick="exportGestores()"><span style="font-size:18px">👥</span><div><div style="font-weight:700;font-size:12px">Relatório de Gestores</div><div style="font-size:10px;color:var(--muted)">${getUsers().length} usuários</div></div></button>`:''}
+    </div>
+    <div style="margin-top:16px">
+      <div class="dct" style="margin-bottom:8px">Resumo</div>
+      <div class="sgrid">
+        <div class="scard" style="background:#eff6ff"><div class="snum" style="color:var(--indigo)">${pats.length}</div><div class="slb">Pacientes</div></div>
+        <div class="scard" style="background:#f0fdf4"><div class="snum" style="color:var(--green)">${pats.filter(p=>p.tipo==='leve').length}</div><div class="slb">Leve</div></div>
+        <div class="scard" style="background:#fef2f2"><div class="snum" style="color:var(--red)">${pats.filter(p=>p.tipo==='grave').length}</div><div class="slb">Grave</div></div>
+      </div>
+    </div>`;
+}
+function dl(f,h){ const a=document.createElement('a'); a.href=h; a.download=f; a.click(); }
+function exportCSV(){
+  const h='Nome,Nascimento,Prontuário,Coagulopatia,Classificação,Última Consulta,Telefone,Responsável\n';
+  const r=getPats().map(p=>`"${p.nome}","${p.nasc}","${p.pront}","${p.coag}","${BL(p.tipo)}","${p.ultima}","${p.tel}","${p.resp}"`).join('\n');
+  dl('pacientes.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+r)); addLog('CSV pacientes exportado'); toast('📋 CSV exportado!');
+}
+function exportExamesCSV(){
+  const pats=getPats();
+  const h='Paciente,Tipo,Data,Resultado,Método,Laboratório\n';
+  const r=getExames().map(x=>{const p=pats.find(p=>p.id===x.pacId);return`"${p?p.nome:'—'}","${x.tipo}","${x.data}","${x.res}","${x.met}","${x.lab}"`;}).join('\n');
+  dl('exames.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+r)); toast('📋 CSV exportado!');
+}
+function exportMedsCSV(){
+  const pats=getPats();
+  const h='Paciente,Medicação,Dose,Frequência,Via,Início,Situação,Observações\n';
+  const r=getMeds().map(m=>{const p=pats.find(p=>p.id===m.pacId);return`"${p?p.nome:'—'}","${m.nome}","${m.dose}","${m.freq}","${m.via}","${m.inicio}","${m.situacao}","${m.obs}"`;}).join('\n');
+  dl('medicacoes.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+r)); toast('📋 CSV exportado!');
+}
+function exportLog(){ dl('log.txt','data:text/plain;charset=utf-8,'+encodeURIComponent(getLog().map(l=>`[${l.time}] ${l.user}: ${l.action}`).join('\n'))); toast('📝 Log exportado!'); }
+function exportGestores(){
+  const h='Nome,CRM,Especialidade,Nível\n';
+  dl('gestores.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+getUsers().map(u=>`"${u.nome}","${u.crm}","${u.esp}","${u.role}"`).join('\n'))); toast('📋 CSV exportado!');
+}
+
+/* ══ CONFIG ══ */
+function renderCfg(){
+  document.getElementById('cfg-body').innerHTML=`
+    <div class="dct">Meu Perfil</div>
+    ${ir('Nome',CU.nome)}${ir('CRM',CU.crm)}${ir('Especialidade',CU.esp)}
+    <div class="ir"><span class="ik">Nível:</span><span class="badge ${CU.role==='master'?'bmaster':'bgestor'}">${CU.role==='master'?'Gestor Master':'Gestor'}</span></div>
+    <hr class="dvd"/>
+    <div class="dct">Alterar Senha</div>
+    <div class="fr2" style="margin-top:8px">
+      <div class="fg"><label class="fl">Nova senha</label><input class="fi" id="cp1" type="password" placeholder="••••••••"/></div>
+      <div class="fg"><label class="fl">Confirmar</label><input class="fi" id="cp2" type="password" placeholder="••••••••"/></div>
+    </div>
+    <button class="btnp" onclick="chgPass()">Salvar senha</button>
+    ${CU.role==='master'?`<hr class="dvd"/><div class="dct" style="color:var(--red)">Zona de Perigo</div>
+    <button class="btnd" style="margin-top:8px;font-size:12px" onclick="confResetData()">🔄 Resetar todos os dados para padrão</button>`:''}`;
+}
+function chgPass(){
+  const p1=document.getElementById('cp1').value, p2=document.getElementById('cp2').value;
+  if(!p1||p1!==p2){toast('⚠️ Senhas não coincidem.');return;}
+  const users=getUsers(); const i=users.findIndex(u=>u.crm===CU.crm); if(i>-1){users[i].pass=p1;setUsers(users);}
+  addLog('Senha alterada'); toast('✅ Senha alterada!');
+}
+function confResetData(){
+  document.getElementById('conf-msg').textContent='Isso apagará TODOS os pacientes, exames e medicações cadastrados. Continuar?';
+  document.getElementById('conf-ok').textContent='Resetar';
+  document.getElementById('conf-ok').onclick=()=>{
+    LS.set('cg_pats',DEFAULT_PATS); LS.set('cg_exames',DEFAULT_EXAMES); LS.set('cg_meds',DEFAULT_MEDS); LS.set('cg_log',[]);
+    addLog('Dados resetados para padrão'); closeM('confirm'); renderT1(); renderT2(); updateCatCount(); toast('✅ Dados resetados!');
+  };
+  openM('confirm');
+}
+
+/* ══ MODALS ══ */
+function openM(id){ document.getElementById('modal-'+id).classList.add('show'); }
+function closeM(id){ document.getElementById('modal-'+id).classList.remove('show'); }
+document.querySelectorAll('.mbg').forEach(mb=>{
+  mb.addEventListener('click',e=>{ if(e.target===mb){ const id=mb.id.replace('modal-',''); closeM(id); }});
+});
+</script>
+</body>
+</html>
