@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>CoagulCare</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f172a;--navy2:#1e293b;--navy3:#334155;--slate:#475569;
+  --muted:#64748b;--muted2:#94a3b8;--border:#e2e8f0;--bg:#f1f5f9;
+  --white:#fff;--indigo:#4f46e5;--indigo2:#4338ca;--indigo-l:#eef2ff;
+  --red:#dc2626;--rl:#fef2f2;--rb:#fecaca;
+  --green:#16a34a;--gl:#f0fdf4;--gb:#bbf7d0;
+  --orange:#ea580c;--ol:#fff7ed;--ob:#fed7aa;
+  --amber:#d97706;--al:#fffbeb;--ab:#fde68a;
+  --purple:#7c3aed;--pl:#faf5ff;--pb:#ddd6fe;
+  --cyan:#0891b2;--cl:#ecfeff;--cbl:#a5f3fc;
+  --font:'Sora',sans-serif;
+  --shadow:0 1px 3px #0000001a,0 1px 2px #0000000f;
+  --shadow-md:0 4px 6px -1px #0000001a,0 2px 4px -1px #0000000f;
+  --shadow-lg:0 10px 15px -3px #0000001a,0 4px 6px -2px #0000000d;
+}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--navy);overflow:hidden}
+#app{display:flex;height:100vh;width:100vw;overflow:hidden;position:relative}
+
+/* ══ SIDEBAR ══ */
+#sidebar{position:fixed;top:0;left:0;height:100vh;width:260px;background:var(--navy);display:flex;flex-direction:column;z-index:300;transform:translateX(-100%);transition:transform .25s ease;box-shadow:var(--shadow-lg)}
+#sidebar.open{transform:translateX(0)}
+@media(min-width:900px){#sidebar{position:relative;transform:none!important;width:230px;flex-shrink:0}#overlay{display:none!important}#menu-toggle{display:none!important}}
+#overlay{display:none;position:fixed;inset:0;background:#0009;z-index:200}
+#overlay.show{display:block}
+.logo-wrap{padding:20px 18px;border-bottom:1px solid #ffffff15;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#f87171,#dc2626);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 12px #dc262640}
+.logo-name{font-weight:800;font-size:15px;color:#fff;letter-spacing:-.3px}
+.logo-sub{font-size:10px;color:var(--muted2);margin-top:1px}
+nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-section{font-size:9px;font-weight:700;color:#ffffff40;text-transform:uppercase;letter-spacing:.08em;padding:8px 12px 4px;margin-top:4px}
+.nb{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;margin-bottom:2px;background:transparent;color:#94a3b8;font-size:13px;font-weight:500;font-family:var(--font);transition:all .15s;text-align:left}
+.nb:hover{background:#ffffff12;color:#fff}
+.nb.active{background:linear-gradient(135deg,var(--indigo),#6366f1);color:#fff;font-weight:700;box-shadow:0 4px 12px #4f46e540}
+.ni{font-size:16px;flex-shrink:0;width:20px;text-align:center}
+.adot{font-size:10px;font-weight:700;background:var(--red);color:#fff;border-radius:20px;padding:1px 7px;margin-left:auto;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.sb-bot{padding:8px 10px 6px;flex-shrink:0}
+.sb-user{padding:14px 16px;border-top:1px solid #ffffff10;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.uav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;box-shadow:0 2px 8px #4f46e540}
+.uname{font-size:11px;font-weight:700;color:#f1f5f9;line-height:1.3}
+.urole{font-size:10px;color:var(--muted2);margin-top:1px}
+.ubadge{font-size:9px;border-radius:4px;padding:1px 6px;font-weight:700;display:inline-block;margin-top:3px;color:#fff}
+
+/* ══ MAIN ══ */
+#main{flex:1;display:flex;flex-direction:column;width:100%;min-width:0;overflow:hidden}
+#topbar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:var(--shadow)}
+#menu-toggle{background:none;border:none;cursor:pointer;font-size:22px;color:var(--navy3);padding:2px;flex-shrink:0;line-height:1}
+.sw{flex:1;position:relative;max-width:400px}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:13px;pointer-events:none}
+.sinput{width:100%;padding:8px 12px 8px 32px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;outline:none;background:var(--bg);font-family:var(--font);transition:border-color .15s}
+.sinput:focus{border-color:var(--indigo);background:var(--white)}
+.tb-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.tb-btn{background:none;border:none;cursor:pointer;font-size:20px;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:background .15s;position:relative}
+.tb-btn:hover{background:var(--bg)}
+.notif-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--white)}
+
+/* ══ CONTENT ══ */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+#content::-webkit-scrollbar{width:4px}
+#content::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:9px}
+
+/* ══ FOOTER ══ */
+#footer{border-top:1px solid var(--border);padding:7px 16px;display:flex;justify-content:space-between;background:var(--white);flex-shrink:0}
+#footer span{font-size:10px;color:var(--muted2)}
+
+/* ══ PAGES ══ */
+.page{padding:18px 16px;display:none;animation:fi .2s ease}
+.page.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ptitle{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:18px;letter-spacing:-.3px}
+.slbl{font-size:11px;font-weight:700;color:var(--slate);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
+
+/* ══ STAT CARDS ══ */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+@media(min-width:700px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{background:var(--white);border-radius:14px;padding:16px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+.sc-blue::before{background:linear-gradient(90deg,var(--indigo),#6366f1)}
+.sc-green::before{background:linear-gradient(90deg,var(--green),#22c55e)}
+.sc-red::before{background:linear-gradient(90deg,var(--red),#f87171)}
+.sc-amber::before{background:linear-gradient(90deg,var(--amber),#fbbf24)}
+.stat-num{font-size:26px;font-weight:800;color:var(--navy);line-height:1}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500}
+.stat-icon{font-size:24px;margin-bottom:8px}
+.stat-trend{font-size:10px;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:3px}
+.trend-up{color:var(--green)}.trend-down{color:var(--red)}.trend-neu{color:var(--muted)}
+
+/* ══ CAT GRID ══ */
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+@media(min-width:500px){.cat-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:700px){.cat-grid{grid-template-columns:repeat(4,1fr)}}@media(min-width:1100px){.cat-grid{grid-template-columns:repeat(7,1fr)}}
+.catc{border-radius:13px;padding:14px 10px;cursor:pointer;text-align:center;border:1.5px solid;transition:all .2s;min-width:0;box-shadow:var(--shadow)}
+.catc:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.catc:active{transform:scale(.97)}
+.cati{font-size:24px;margin-bottom:6px}
+.catn{font-size:11px;font-weight:700;line-height:1.3;word-break:break-word}
+.cats{font-size:10px;color:var(--muted2);margin-top:1px}
+.catct{font-size:11px;color:var(--muted);margin-top:5px;font-weight:600}
+
+/* ══ ATALHOS ══ */
+.atl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+@media(min-width:700px){.atl-grid{grid-template-columns:repeat(4,1fr)}}
+.atlb{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:13px 12px;cursor:pointer;display:flex;align-items:center;gap:9px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--navy3);transition:all .15s;min-width:0;box-shadow:var(--shadow)}
+.atlb:hover{border-color:var(--indigo);color:var(--indigo);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.atl-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+/* ══ CARDS ══ */
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.chdr{padding:14px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.ctitle{font-weight:700;font-size:13px;color:var(--navy)}
+.cbody{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cpad{padding:16px}
+
+/* ══ FILTER BAR ══ */
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.fsel-sm{padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--font);outline:none;background:var(--white);color:var(--navy3);cursor:pointer}
+.fsel-sm:focus{border-color:var(--indigo)}
+.filter-chip{padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--muted);transition:all .15s}
+.filter-chip.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+
+/* ══ TABLE ══ */
+table{width:100%;border-collapse:collapse;min-width:480px}
+th{padding:10px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #f1f5f9;white-space:nowrap;background:#fafafa}
+td{padding:11px 10px;font-size:12px;color:var(--navy);border-bottom:1px solid #f8fafc;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:#f8fafc}
+
+/* ══ BADGES ══ */
+.badge{border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;border:1px solid;display:inline-block;white-space:nowrap}
+.bg2{background:var(--rl);color:var(--red);border-color:var(--rb)}
+.bm{background:var(--ol);color:var(--orange);border-color:var(--ob)}
+.bl{background:var(--gl);color:var(--green);border-color:var(--gb)}
+.bu{background:var(--gl);color:var(--green);border-color:var(--gb);font-size:10px}
+.bsus{background:#fff7ed;color:#c2410c;border-color:#fed7aa;font-size:10px}
+.bmaster{background:#fef3c7;color:#92400e;border-color:#fde68a;font-size:10px}
+.bgestor{background:#ede9fe;color:#5b21b6;border-color:#ddd6fe;font-size:10px}
+.binfo{background:var(--indigo-l);color:var(--indigo);border-color:#c7d2fe;font-size:10px}
+
+/* ══ ACTIONS ══ */
+.ab{border:none;border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+.av2{background:#eff6ff;color:#2563eb}.av2:hover{background:#dbeafe}
+.ae{background:#f0fdf4;color:#16a34a}.ae:hover{background:#dcfce7}
+.adel{background:#fef2f2;color:#dc2626}.adel:hover{background:#fee2e2}
+.acc{display:flex;gap:4px}
+
+/* ══ PAGINATION ══ */
+.pag{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-wrap:wrap;gap:6px;background:#fafafa;border-top:1px solid #f1f5f9}
+.pag-i{font-size:11px;color:var(--muted2)}.pag-b{display:flex;gap:3px}
+.pb{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--white);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s}
+.pb:hover{border-color:var(--indigo);color:var(--indigo)}
+.pb.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+
+/* ══ BTNS ══ */
+.btnp{background:linear-gradient(135deg,var(--indigo),#6366f1);color:#fff;border:none;border-radius:9px;padding:9px 15px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font);white-space:nowrap;box-shadow:0 2px 8px #4f46e530;transition:all .15s}
+.btnp:hover{transform:translateY(-1px);box-shadow:0 4px 12px #4f46e540}
+.btno{background:var(--white);border:1.5px solid var(--border);border-radius:9px;padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy3);font-family:var(--font);display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btno:hover{border-color:var(--indigo);color:var(--indigo)}
+.btnd{background:var(--red);color:#fff;border:none;border-radius:9px;padding:8px 14px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font);transition:all .15s}
+.btnd:hover{background:#b91c1c}
+.btnw{background:var(--white);border:1.5px solid var(--border);border-radius:9px;padding:8px 14px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font);color:var(--navy3);transition:all .15s}
+.btnw:hover{background:var(--bg)}
+.backb{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:22px;padding:0 4px;line-height:1;transition:color .15s}
+.backb:hover{color:var(--navy)}
+
+/* ══ DETAIL ══ */
+.dhdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:10px;flex-wrap:wrap}
+.dleft{display:flex;align-items:flex-start;gap:10px}
+.pat-avatar{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:800;flex-shrink:0;box-shadow:var(--shadow-md)}
+.ptit{font-size:18px;font-weight:800;color:var(--navy);margin:0;letter-spacing:-.3px}
+.pmeta{font-size:11px;color:var(--muted);margin-top:4px;display:flex;flex-wrap:wrap;gap:8px}
+.pmeta-chip{display:inline-flex;align-items:center;gap:3px}
+
+/* ══ TABS ══ */
+.tabs{display:flex;border-bottom:2px solid #f1f5f9;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:0}
+.tabs::-webkit-scrollbar{display:none}
+.tabb{padding:10px 16px;background:none;border:none;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:500;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:6px}
+.tabb:hover{color:var(--navy)}
+.tabb.active{font-weight:700;color:var(--indigo);border-bottom-color:var(--indigo)}
+.stabs{display:flex;border-bottom:1.5px solid #f1f5f9;margin-bottom:12px;overflow-x:auto}
+.stabs::-webkit-scrollbar{display:none}
+.stab{padding:7px 12px;background:none;border:none;cursor:pointer;font-size:11px;font-family:var(--font);font-weight:500;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s}
+.stab.active{color:var(--indigo);font-weight:700;border-bottom-color:var(--indigo)}
+
+/* ══ DETAIL GRID ══ */
+.dgrid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:650px){.dgrid{grid-template-columns:1fr 1fr}}
+@media(min-width:1000px){.dgrid{grid-template-columns:1fr 1fr 1fr}}
+.dc{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:16px;box-shadow:var(--shadow)}
+.dct{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ir{display:flex;margin-bottom:8px;gap:4px;flex-wrap:wrap}
+.ik{font-size:11px;font-weight:600;color:var(--slate);min-width:110px;flex-shrink:0}
+.iv{font-size:11px;color:var(--navy)}.ivg{font-size:11px;color:var(--green);font-weight:700}
+.ivr{font-size:11px;color:var(--red);font-weight:700}
+.cs2{grid-column:1/-1}@media(min-width:1000px){.cs2{grid-column:span 2}}
+
+/* ══ CHART ══ */
+.chart-wrap{width:100%;overflow:hidden;border-radius:10px;background:var(--bg);padding:10px}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:4px}
+.bar{border-radius:6px 6px 0 0;width:100%;min-height:4px;transition:height .5s ease;position:relative;cursor:pointer}
+.bar:hover{opacity:.85}
+.bar-val{font-size:9px;font-weight:700;color:var(--navy);text-align:center}
+.bar-lbl{font-size:9px;color:var(--muted);text-align:center;word-break:break-word;line-height:1.2}
+.line-chart-wrap{width:100%;overflow:hidden}
+.line-chart-wrap svg{width:100%;display:block}
+
+/* ══ ALERT BOX ══ */
+.abox{border-radius:11px;padding:13px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+.abox-red{background:var(--rl);border:1px solid var(--rb)}
+.abox-amber{background:var(--al);border:1px solid var(--ab)}
+.abox-green{background:var(--gl);border:1px solid var(--gb)}
+.abox-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.at2{font-size:12px;font-weight:700;margin-bottom:3px}
+.at2-red{color:var(--red)}.at2-amber{color:var(--amber)}.at2-green{color:var(--green)}
+.an2{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.am{font-size:11px;color:var(--muted)}
+.dlb{background:#eff6ff;border:none;border-radius:5px;width:26px;height:26px;cursor:pointer;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.dvd{border:none;border-top:1px solid var(--border);margin:12px 0}
+.smlbl{font-size:10px;font-weight:700;color:var(--muted2);margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase}
+
+/* ══ EPISÓDIO CARD ══ */
+.ep-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.ep-title{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ep-meta{font-size:11px;color:var(--muted)}
+
+/* ══ MODAL ══ */
+.mbg{display:none;position:fixed;inset:0;background:#0009;z-index:500;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:600px){.mbg{align-items:center;padding:16px}}
+.mbg.show{display:flex}
+.modal{background:var(--white);border-radius:18px 18px 0 0;padding:22px 18px 32px;width:100%;max-width:540px;max-height:94vh;overflow-y:auto}
+@media(min-width:600px){.modal{border-radius:18px;padding:26px}}
+.mtit{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:18px;letter-spacing:-.3px}
+.fg{margin-bottom:12px}.fl{font-size:11px;font-weight:700;color:var(--slate);display:block;margin-bottom:4px}
+.fi,.fsel{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:var(--font);outline:none;background:var(--white);transition:border-color .15s}
+.fi:focus,.fsel:focus{border-color:var(--indigo)}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.mdrag{width:36px;height:4px;background:#e2e8f0;border-radius:9px;margin:0 auto 18px}
+
+/* ══ LOGIN ══ */
+#lscreen{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center;z-index:600;padding:16px}
+.lcard{background:var(--white);border-radius:20px;padding:32px 26px;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.lerr{background:var(--rl);color:var(--red);border:1px solid var(--rb);border-radius:9px;padding:10px 13px;font-size:12px;margin-bottom:14px;display:none;align-items:center;gap:6px}
+.lbtn{width:100%;background:linear-gradient(135deg,var(--indigo),#6366f1);color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);margin-top:6px;box-shadow:0 4px 14px #4f46e540;transition:all .15s}
+.lbtn:hover{transform:translateY(-1px);box-shadow:0 6px 20px #4f46e550}
+
+/* ══ USER ROW ══ */
+.urow{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f1f5f9}
+.urow:last-child{border-bottom:none}
+.uravt{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,var(--indigo));display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+.urinf{flex:1;min-width:0}
+.urname{font-size:12px;font-weight:700;color:var(--navy)}
+.ursub{font-size:11px;color:var(--muted);margin-top:1px}
+.logrow{padding:9px 0;border-bottom:1px solid #f8fafc;font-size:11px;color:var(--navy3)}
+.logrow:last-child{border-bottom:none}
+.logt{font-size:10px;color:var(--muted2);margin-top:2px}
+
+/* ══ PRINT ══ */
+@media print{
+  #sidebar,#topbar,#footer,.nb,.btnp,.btno,.btnd,.btnw,.ab,.backb,#menu-toggle,.tb-btn{display:none!important}
+  #app{display:block;height:auto}
+  #main{overflow:visible}
+  #content{overflow:visible}
+  .page{display:block!important;padding:10px}
+  body{overflow:auto}
+}
+
+/* ══ EMPTY STATE ══ */
+.empty-state{padding:40px 20px;text-align:center}
+.empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
+.empty-title{font-size:14px;font-weight:700;color:var(--muted2);margin-bottom:4px}
+.empty-sub{font-size:12px;color:#cbd5e1}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:11px 22px;border-radius:30px;font-size:12px;font-weight:600;z-index:999;transition:transform .3s ease;pointer-events:none;box-shadow:var(--shadow-lg);white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ══ PROGRESS BAR ══ */
+.prog-wrap{background:#f1f5f9;border-radius:20px;height:8px;overflow:hidden;margin-top:4px}
+.prog-bar{height:100%;border-radius:20px;transition:width .5s ease}
+
+/* ══ INFO CARD ══ */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-item{background:var(--bg);border-radius:9px;padding:10px 12px}
+.info-item-lbl{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.info-item-val{font-size:13px;font-weight:700;color:var(--navy)}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- LOGIN -->
+<div id="lscreen">
+  <div class="lcard">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:26px">
+      <div class="logo-icon" style="width:48px;height:48px;font-size:26px">🩸</div>
+      <div>
+        <div style="font-weight:800;font-size:20px;color:var(--navy);letter-spacing:-.5px">CoagulCare</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">Gestão de Pacientes Hematológicos</div>
+      </div>
+    </div>
+    <div id="lerr" class="lerr">⚠️ CRM ou senha incorretos.</div>
+    <div class="fg"><label class="fl">CRM</label><input class="fi" id="lcrm" placeholder="Ex: 11707" inputmode="numeric" style="font-size:15px;padding:12px 14px"/></div>
+    <div class="fg"><label class="fl">Senha</label><input class="fi" id="lpass" type="password" placeholder="••••••••" style="font-size:15px;padding:12px 14px"/></div>
+    <button class="lbtn" onclick="doLogin()">Entrar no sistema</button>
+    <p style="font-size:10px;color:var(--muted2);text-align:center;margin-top:14px">🔒 Acesso restrito a profissionais autorizados</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div id="overlay" onclick="closeSB()"></div>
+  <aside id="sidebar">
+    <div class="logo-wrap">
+      <div class="logo-icon">🩸</div>
+      <div><div class="logo-name">CoagulCare</div><div class="logo-sub">Gestão Hematológica</div></div>
+    </div>
+    <nav id="snav">
+      <div class="nav-section">Principal</div>
+      <button class="nb active" data-p="dashboard"><span class="ni">🏠</span>Dashboard</button>
+      <button class="nb" data-p="pacientes"><span class="ni">👤</span>Pacientes</button>
+      <div class="nav-section">Clínico</div>
+      <button class="nb" data-p="exames"><span class="ni">🧪</span>Exames</button>
+      <button class="nb" data-p="medicacoes"><span class="ni">💊</span>Medicações</button>
+      <button class="nb" data-p="episodios"><span class="ni">🩹</span>Episódios</button>
+      <button class="nb" data-p="alertas"><span class="ni">🔔</span>Alertas<span class="adot" id="alert-dot">0</span></button>
+      <div class="nav-section">Gestão</div>
+      <button class="nb" data-p="relatorios"><span class="ni">📊</span>Relatórios</button>
+      <div id="ng-wrap"></div>
+      <button class="nb" data-p="configuracoes"><span class="ni">⚙️</span>Configurações</button>
+    </nav>
+    <div class="sb-bot"><button class="nb" onclick="doLogout()"><span class="ni">🚪</span>Sair</button></div>
+    <div class="sb-user">
+      <div class="uav" id="sav">RC</div>
+      <div><div class="uname" id="sname">—</div><div class="urole" id="srole">—</div><span class="ubadge" id="sbadge">—</span></div>
+    </div>
+  </aside>
+
+  <div id="main">
+    <header id="topbar">
+      <button id="menu-toggle" onclick="toggleSB()">☰</button>
+      <div class="sw"><span class="si">🔍</span><input class="sinput" id="gsearch" placeholder="Buscar paciente..." oninput="filterT()"/></div>
+      <div class="tb-right">
+        <button class="tb-btn" onclick="nav('alertas')" title="Alertas">🔔<span class="notif-dot" id="notif-dot" style="display:none"></span></button>
+        <button class="tb-btn" onclick="window.print()" title="Imprimir">🖨️</button>
+      </div>
+    </header>
+    <div id="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <h1 class="ptitle">Dashboard</h1>
+        <!-- Stats -->
+        <div class="stats-grid" id="stats-grid"></div>
+        <!-- Alertas vencidos -->
+        <div id="dash-alerts"></div>
+        <!-- Gráfico -->
+        <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:20px" id="chart-section">
+          <div class="card cpad">
+            <div class="dct" style="margin-bottom:12px">📊 Pacientes por Coagulopatia</div>
+            <div class="bar-chart" id="bar-chart"></div>
+          </div>
+        </div>
+        <div class="slbl">Categorias de Coagulopatias</div>
+        <div class="cat-grid">
+          <div class="catc" style="background:#eff6ff;border-color:#bfdbfe" onclick="filterAndNav('Hemofilia A')"><div class="cati">💧</div><div class="catn" style="color:#2563eb">Hemofilia A</div><div class="cats">(Fator VIII)</div><div class="catct" id="cnt-hemA">—</div></div>
+          <div class="catc" style="background:#f0fdf4;border-color:#bbf7d0" onclick="filterAndNav('Hemofilia B')"><div class="cati">🩸</div><div class="catn" style="color:#16a34a">Hemofilia B</div><div class="cats">(Fator IX)</div><div class="catct" id="cnt-hemB">—</div></div>
+          <div class="catc" style="background:#faf5ff;border-color:#ddd6fe" onclick="filterAndNav('Von Willebrand')"><div class="cati">🔬</div><div class="catn" style="color:#7c3aed">Von Willebrand</div><div class="catct" id="cnt-vW">—</div></div>
+          <div class="catc" style="background:#fffbeb;border-color:#fde68a" onclick="filterAndNav('Talassemia')"><div class="cati">🧬</div><div class="catn" style="color:#d97706">Talassemia</div><div class="catct" id="cnt-tal">—</div></div>
+          <div class="catc" style="background:#fef2f2;border-color:#fecaca" onclick="filterAndNav('An. Falciforme')"><div class="cati">🔴</div><div class="catn" style="color:#dc2626">An. Falciforme</div><div class="catct" id="cnt-fal">—</div></div>
+          <div class="catc" style="background:#fff7ed;border-color:#fed7aa" onclick="filterAndNav('Doença Falciforme')"><div class="cati">🌙</div><div class="catn" style="color:#c2410c">Doença Falciforme</div><div class="catct" id="cnt-df">—</div></div>
+          <div class="catc" style="background:#fff7ed;border-color:#fed7aa" onclick="filterAndNav('Doença Falciforme')"><div class="cati">🌙</div><div class="catn" style="color:#c2410c">Doença Falciforme</div><div class="catct" id="cnt-df">—</div></div>
+          <div class="catc" style="background:#ecfeff;border-color:#a5f3fc" onclick="filterAndNav('Outra')"><div class="cati">🩺</div><div class="catn" style="color:#0891b2">Outras</div><div class="catct" id="cnt-out">—</div></div>
+        </div>
+        <div class="slbl">Atalhos rápidos</div>
+        <div class="atl-grid">
+          <button class="atlb" id="btn-nd" onclick="openM('new-patient')"><div class="atl-icon" style="background:#eef2ff">👤</div>Novo Paciente</button>
+          <button class="atlb" onclick="openNewExam()"><div class="atl-icon" style="background:#f0fdf4">🧪</div>Novo Exame</button>
+          <button class="atlb" onclick="openNewMed()"><div class="atl-icon" style="background:#fff7ed">💊</div>Nova Medicação</button>
+          <button class="atlb" onclick="nav('relatorios')"><div class="atl-icon" style="background:#faf5ff">📊</div>Relatórios</button>
+        </div>
+        <div class="slbl">Pacientes recentes</div>
+        <div class="card">
+          <div class="chdr"><span class="ctitle">Lista de Pacientes</span><button class="btnp" id="btn-nd2" onclick="openM('new-patient')">+ Novo Paciente</button></div>
+          <div class="cbody"><table><thead><tr><th>Nome</th><th>Coagulopatia</th><th>Classificação</th><th>Última Consulta</th><th>Ações</th></tr></thead><tbody id="t1"></tbody></table></div>
+          <div class="pag"><span class="pag-i" id="pi1"></span><div class="pag-b" id="pb1"></div></div>
+        </div>
+      </div>
+
+      <!-- PACIENTES -->
+      <div class="page" id="page-pacientes">
+        <h1 class="ptitle">Pacientes</h1>
+        <div class="filter-bar" id="pac-filters"></div>
+        <div class="card">
+          <div class="chdr"><span class="ctitle" id="pac-count-title">Pacientes</span><button class="btnp" id="btn-np" onclick="openM('new-patient')">+ Novo Paciente</button></div>
+          <div class="cbody"><table><thead><tr><th>Nome</th><th>Nascimento</th><th>Coagulopatia</th><th>Classificação</th><th>Última Consulta</th><th>Ações</th></tr></thead><tbody id="t2"></tbody></table></div>
+          <div class="pag"><span class="pag-i" id="pi2"></span><div class="pag-b" id="pb2"></div></div>
+        </div>
+      </div>
+
+      <!-- DETALHE -->
+      <div class="page" id="page-detail"></div>
+
+      <!-- EXAMES -->
+      <div class="page" id="page-exames"><h1 class="ptitle">Exames</h1><div id="exames-body"></div></div>
+
+      <!-- MEDICAÇÕES -->
+      <div class="page" id="page-medicacoes"><h1 class="ptitle">Medicações</h1><div id="meds-body"></div></div>
+
+      <!-- EPISÓDIOS -->
+      <div class="page" id="page-episodios"><h1 class="ptitle">Episódios de Sangramento</h1><div id="ep-body"></div></div>
+
+      <!-- ALERTAS -->
+      <div class="page" id="page-alertas"><h1 class="ptitle">Alertas</h1><div id="alertas-body"></div></div>
+
+      <!-- RELATÓRIOS -->
+      <div class="page" id="page-relatorios"><h1 class="ptitle">Relatórios</h1><div id="relat-body"></div></div>
+
+      <!-- GESTORES -->
+      <div class="page" id="page-gestores">
+        <h1 class="ptitle">Gestão de Usuários</h1>
+        <div class="card cpad" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <span class="ctitle">Gestores cadastrados</span><button class="btnp" onclick="openM('new-gestor')">+ Novo Gestor</button>
+          </div>
+          <div id="glist"></div>
+        </div>
+        <div class="card cpad"><div class="ctitle" style="margin-bottom:12px">📋 Log de Atividades</div><div id="alog"></div></div>
+      </div>
+
+      <!-- CONFIGURAÇÕES -->
+      <div class="page" id="page-configuracoes"><h1 class="ptitle">Configurações</h1><div class="card cpad"><div id="cfg-body"></div></div></div>
+
+    </div>
+    <footer id="footer"><span>CoagulCare — Gestão de Pacientes Hematológicos</span><span>v2.0.0</span></footer>
+  </div>
+</div>
+
+<!-- MODAIS -->
+<div class="mbg" id="modal-new-patient">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">👤 Novo Paciente</div>
+    <div class="fr2"><div class="fg"><label class="fl">Nome completo *</label><input class="fi" id="np-nome" placeholder="Nome completo"/></div><div class="fg"><label class="fl">Data de nascimento</label><input class="fi" id="np-nasc" type="date"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Sexo</label><select class="fsel" id="np-sexo"><option>Masculino</option><option>Feminino</option></select></div><div class="fg"><label class="fl">Prontuário</label><input class="fi" id="np-pront" placeholder="000000"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Coagulopatia</label><select class="fsel" id="np-coag"><option>Hemofilia A</option><option>Hemofilia B</option><option>Von Willebrand</option><option>Talassemia</option><option>An. Falciforme</option><option>Outra</option></select></div><div class="fg"><label class="fl">Classificação</label><select class="fsel" id="np-class"><option value="grave">Grave</option><option value="moderada">Moderada</option><option value="leve">Leve</option></select></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Grupo Sanguíneo</label><select class="fsel" id="np-gs"><option>—</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div><div class="fg"><label class="fl">Peso (kg)</label><input class="fi" id="np-peso" placeholder="Ex: 70" inputmode="decimal"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Telefone</label><input class="fi" id="np-tel" placeholder="(00) 00000-0000" inputmode="tel"/></div><div class="fg"><label class="fl">Responsável</label><input class="fi" id="np-resp" placeholder="Nome do responsável"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Profilaxia</label><select class="fsel" id="np-prof"><option>Sim</option><option>Não</option></select></div><div class="fg"><label class="fl">Acesso Venoso</label><select class="fsel" id="np-acesso"><option>Port-a-cath</option><option>Veia periférica</option><option>PICC</option><option>Outro</option></select></div></div>
+    <div class="fg"><label class="fl">Observações clínicas</label><textarea class="fi" id="np-obs" placeholder="Observações..." rows="2" style="resize:vertical"></textarea></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-patient')">Cancelar</button><button class="btnp" onclick="savePatient()">💾 Salvar Paciente</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-edit-patient">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">✏️ Editar Paciente</div>
+    <div class="fr2"><div class="fg"><label class="fl">Nome completo</label><input class="fi" id="ep-nome"/></div><div class="fg"><label class="fl">Data de nascimento</label><input class="fi" id="ep-nasc" type="date"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Sexo</label><select class="fsel" id="ep-sexo"><option>Masculino</option><option>Feminino</option></select></div><div class="fg"><label class="fl">Prontuário</label><input class="fi" id="ep-pront"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Coagulopatia</label><select class="fsel" id="ep-coag"><option>Hemofilia A</option><option>Hemofilia B</option><option>Von Willebrand</option><option>Talassemia</option><option>An. Falciforme</option><option>Outra</option></select></div><div class="fg"><label class="fl">Classificação</label><select class="fsel" id="ep-class"><option value="grave">Grave</option><option value="moderada">Moderada</option><option value="leve">Leve</option></select></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Grupo Sanguíneo</label><select class="fsel" id="ep-gs"><option>—</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div><div class="fg"><label class="fl">Peso (kg)</label><input class="fi" id="ep-peso" inputmode="decimal"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Telefone</label><input class="fi" id="ep-tel" inputmode="tel"/></div><div class="fg"><label class="fl">Responsável</label><input class="fi" id="ep-resp"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Profilaxia</label><select class="fsel" id="ep-prof"><option>Sim</option><option>Não</option></select></div><div class="fg"><label class="fl">Acesso Venoso</label><select class="fsel" id="ep-acesso"><option>Port-a-cath</option><option>Veia periférica</option><option>PICC</option><option>Outro</option></select></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Inibidor</label><select class="fsel" id="ep-inib"><option>Negativo</option><option>Positivo</option></select></div><div class="fg"><label class="fl">Última Consulta</label><input class="fi" id="ep-ultima" type="date"/></div></div>
+    <div class="fg"><label class="fl">Observações</label><textarea class="fi" id="ep-obs" rows="2" style="resize:vertical"></textarea></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('edit-patient')">Cancelar</button><button class="btnp" onclick="updatePatient()">💾 Salvar Alterações</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-new-exam">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">🧪 Novo Exame</div>
+    <div class="fg"><label class="fl">Paciente *</label><select class="fsel" id="ne-pac"></select></div>
+    <div class="fg"><label class="fl">Tipo de Exame</label><select class="fsel" id="ne-tipo"><option>Dosagem de Fator VIII</option><option>Dosagem de Fator IX</option><option>Inibidor (Anticorpo)</option><option>Coagulograma - TP</option><option>Coagulograma - TTPa</option><option>Dímero D</option><option>Fibrinogênio</option><option>Hemograma</option><option>Outro</option></select></div>
+    <div class="fr2"><div class="fg"><label class="fl">Data da Coleta *</label><input class="fi" id="ne-data" type="date"/></div><div class="fg"><label class="fl">Resultado *</label><input class="fi" id="ne-res" placeholder="Ex: 2%, 12s"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Método</label><input class="fi" id="ne-met" placeholder="Ex: Cromogênico"/></div><div class="fg"><label class="fl">Laboratório</label><input class="fi" id="ne-lab" placeholder="Ex: Lab. Hemato"/></div></div>
+    <div class="fg"><label class="fl">Observações</label><input class="fi" id="ne-obs" placeholder="Observações..."/></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-exam')">Cancelar</button><button class="btnp" onclick="saveExam()">💾 Salvar Exame</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-new-med">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">💊 Nova Medicação</div>
+    <div class="fg"><label class="fl">Paciente *</label><select class="fsel" id="nm-pac"></select></div>
+    <div class="fg"><label class="fl">Medicação *</label><input class="fi" id="nm-nome" placeholder="Nome da medicação"/></div>
+    <div class="fr2"><div class="fg"><label class="fl">Dose</label><input class="fi" id="nm-dose" placeholder="Ex: 2500 UI"/></div><div class="fg"><label class="fl">Frequência</label><input class="fi" id="nm-freq" placeholder="Ex: 3x/sem"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Via</label><select class="fsel" id="nm-via"><option>IV</option><option>VO</option><option>SC</option><option>IM</option></select></div><div class="fg"><label class="fl">Data Início</label><input class="fi" id="nm-inicio" type="date"/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Situação</label><select class="fsel" id="nm-sit"><option>Em uso</option><option>Suspenso</option><option>Encerrado</option></select></div><div class="fg"><label class="fl">Observações</label><input class="fi" id="nm-obs" placeholder="Indicação..."/></div></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-med')">Cancelar</button><button class="btnp" onclick="saveMed()">💾 Salvar</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-new-ep">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">🩹 Novo Episódio de Sangramento</div>
+    <div class="fg"><label class="fl">Paciente *</label><select class="fsel" id="nep-pac"></select></div>
+    <div class="fr2"><div class="fg"><label class="fl">Data *</label><input class="fi" id="nep-data" type="date"/></div><div class="fg"><label class="fl">Local do Sangramento</label><input class="fi" id="nep-local" placeholder="Ex: Joelho, cotovelo..."/></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Gravidade</label><select class="fsel" id="nep-grav"><option>Leve</option><option>Moderado</option><option>Grave</option></select></div><div class="fg"><label class="fl">Causa</label><select class="fsel" id="nep-causa"><option>Espontâneo</option><option>Trauma</option><option>Pós-operatório</option><option>Outro</option></select></div></div>
+    <div class="fg"><label class="fl">Tratamento administrado</label><input class="fi" id="nep-trat" placeholder="Ex: Fator VIII 2500 UI IV"/></div>
+    <div class="fg"><label class="fl">Observações</label><textarea class="fi" id="nep-obs" rows="2" style="resize:vertical" placeholder="Evolução clínica..."></textarea></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-ep')">Cancelar</button><button class="btnp" onclick="saveEpisodio()">💾 Registrar Episódio</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-new-gestor">
+  <div class="modal">
+    <div class="mdrag"></div>
+    <div class="mtit">👥 Novo Gestor</div>
+    <div class="fg"><label class="fl">Nome completo *</label><input class="fi" id="ng-nome" placeholder="Dr. Nome Sobrenome"/></div>
+    <div class="fr2"><div class="fg"><label class="fl">CRM *</label><input class="fi" id="ng-crm" placeholder="00000" inputmode="numeric"/></div><div class="fg"><label class="fl">Especialidade</label><input class="fi" id="ng-esp" placeholder="Hematologia"/></div></div>
+    <div class="fg"><label class="fl">Senha inicial *</label><input class="fi" id="ng-pass" type="password" placeholder="••••••••"/></div>
+    <div class="fg"><label class="fl">Nível de acesso</label><select class="fsel" id="ng-role"><option value="gestor">Gestor — pode visualizar alterações</option><option value="readonly">Somente leitura</option></select></div>
+    <div class="mfoot"><button class="btno" onclick="closeM('new-gestor')">Cancelar</button><button class="btnp" onclick="saveGestor()">✅ Cadastrar</button></div>
+  </div>
+</div>
+
+<div class="mbg" id="modal-confirm">
+  <div class="modal" style="max-width:360px">
+    <div class="mdrag"></div>
+    <div class="mtit" id="conf-tit">⚠️ Confirmar</div>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:16px" id="conf-msg">Tem certeza?</p>
+    <div class="mfoot"><button class="btno" onclick="closeM('confirm')">Cancelar</button><button class="btnd" id="conf-ok">Confirmar</button></div>
+  </div>
+</div>
+
+<script>
+/* ══════════ STORAGE ══════════ */
+const LS={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}},
+};
+const DEFAULT_PATS=[
+  {id:1,nome:"Alexandre dos Santos Sampaio",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:2,nome:"Antonio Francisco da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:3,nome:"Antonio Pedro de Melo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:4,nome:"Antônio Tavares Farias",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:5,nome:"Arthur Cosmo Fonseca Leite",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:6,nome:"Bruno Henrique Almeida de Araujo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:7,nome:"Carlos Jose Silva Ferreira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Tornozelo D",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:8,nome:"Cleomenes Almeida Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Tornozelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:9,nome:"Cristiano Nascimento das Neves",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:10,nome:"Davi Medeiros Oliveira de Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:11,nome:"Divanio José dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelhos ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:12,nome:"Ederson Davi Baratto",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:13,nome:"Edvan Silva de Freitas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:14,nome:"Emanuel Queiroga Alexandre",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:15,nome:"Eugeniton Francisco de Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:16,nome:"Evandro Silva de Freitas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:17,nome:"Ewerton Silva de Freitas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:18,nome:"Fernando da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:19,nome:"Filipe Souza dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:20,nome:"Flávio Lopes de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:21,nome:"Francisco de Assis de Melo Ferreira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho e Tornozelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:22,nome:"Gabriel Hermínio da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:23,nome:"Gleysom Pereira Maciel",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:24,nome:"Guilherme Honorato Dantas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:25,nome:"Isaque Emanuel da Silva Barbosa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:26,nome:"Jadson Silva de Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:27,nome:"Jean Carlos dos Santos Sampaio",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:28,nome:"Joî Emanuel Feitosa Lopes",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:29,nome:"Joî Luccas Leite de Lima",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:30,nome:"João Victor Garcia de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:31,nome:"Joaquim Oliveira Bezerra do Nascimento",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:32,nome:"Jorge Cosmo da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho e Cotovelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:33,nome:"José Agostino Granjeiro de Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:34,nome:"José Carlos de Souza Teixeira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:35,nome:"Jose Erix Souza Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:36,nome:"José Matheus Rodrigues Campos Dantas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:37,nome:"José Paulo da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:38,nome:"José Paulo Trajano de Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:39,nome:"José Pedro Bezerra Soares",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelhos",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:40,nome:"Jose Ramos dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:41,nome:"Josinaldo dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:42,nome:"Kauê David Simplicio da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:43,nome:"Klebson Dantas de Lima",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:44,nome:"Lucas Roque Pinto Vieira de Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:45,nome:"Luis Jorge Huizar Coutino",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:46,nome:"Marcone Ferreira de Lima",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:47,nome:"Marinesio Lima de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho e Tornozelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:48,nome:"Mateus Lucena de Melo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:49,nome:"Nathan Uanderley da Silva Mendes",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:50,nome:"Paulo Henrique Barbosa de Caldas Barros",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:51,nome:"Pedro Augusto Souza Ferreira de Lima",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Tornozelos ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:52,nome:"Kaio Henrique Araujo Rocha",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:53,nome:"Kaleb Samuel Brito da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:54,nome:"Pedro Henrique Trajano de Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:55,nome:"Pedro Thiago Nunes Bezerra",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Tornozelo Direito ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:56,nome:"Raimundo Gomes do Nascimento",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:57,nome:"Sergio Barbosa Sobreira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho Esq. ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:58,nome:"Severino Francisco da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:59,nome:"Valeriano Soares Azevedo Junior",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:60,nome:"Vitor Marreiro dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Tornozelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:61,nome:"Yago Walter de Lima Almeida",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"moderada",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:62,nome:"Adriano dos Santos Sampaio",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:63,nome:"Adrino Araujo de Menezes",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:64,nome:"Adryan Renan Barbosa de Queiroz",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:65,nome:"Alexsandro da Silva Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Positivo",obs:"Artropatia: Tornozelos, Joelhos e Cotovelos bilateral",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:66,nome:"Alexsandro dos Santos Sampaio",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:67,nome:"Alirio Caio Araujo do Nascimento",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Positivo",obs:"Artropatia: Cotovelo esquerdo. Com inibidor",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:68,nome:"Anderson Cantarelly da Silva Costa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:69,nome:"André Alves Vieira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:70,nome:"Anthony Gabriel Gomes de Lucena",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:71,nome:"Antonio Deriu Neto",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:72,nome:"Arthur Gabriel Moreira Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:73,nome:"Artur Mendoni da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:74,nome:"Aslan Lima da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok. Sem inibidor",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:75,nome:"Atos Wyllian Martins de Negreiros",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:76,nome:"Benicio Augusto Brito",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:77,nome:"Benjamin Ryan da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:78,nome:"Bernardo Luccas de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:79,nome:"Carlos Eduardo da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:80,nome:"Carlos Leuvan Duarte Bezerra",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:81,nome:"Cassiano Brito Barbosa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:82,nome:"Cassiano Costa da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:83,nome:"Cícero da Silva Nunes Junior",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho B1",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:84,nome:"Cícero do Nascimento Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:85,nome:"Cícero Marques Carneiro",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:86,nome:"Cícero Pereira Carneiro",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:87,nome:"Claudio Henrique Ferreira Domingues",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:88,nome:"Clóber Correia Bezerra da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:89,nome:"Clóber de Souza da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:90,nome:"Douglas Batizo da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:91,nome:"Engelson Marcio Ribeiro Xavier",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Cotovelo e Joelho (3 articulações)",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:92,nome:"Eduardo Fernandes Anacleto Arruda Filho",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Cotovelo (2x) + Tornozelo",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:93,nome:"Edinaldo Alves Ferreira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:94,nome:"Elias Marques Ferreira Filho",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Cotovelo e Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:95,nome:"Elias Nathan Lima Dantas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:96,nome:"Elionas Marques Ferreira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho + Cotovelos ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:97,nome:"Emanuel Vitor Assis da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:98,nome:"Emerson Dantas Rafael",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:99,nome:"Emmanuel Lucas da Silva Burza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:100,nome:"Enzo Gabriel da Silva Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:101,nome:"Erivan Ravi Oliveira da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:102,nome:"Estácio Lima da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Cotovelo e Joelhos",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:103,nome:"Estácio Roberto Oliveira de Lima",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:104,nome:"Euclenio de Sousa Soares",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Cotovelo + Tornozelo",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:105,nome:"Expedito de Sousa Costa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:106,nome:"Fabio Alexandre da Silva Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:107,nome:"Felipe Euzebio Silva Júnior",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:108,nome:"Francisco Campos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:109,nome:"Francisco Martins de Andrade",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelhos e Cotovelos",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:110,nome:"Gabriel Apricio dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:111,nome:"Gabriel Adaff da Silva Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:112,nome:"Geovane Evangelista Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:113,nome:"Geovany Marques de Araújo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:114,nome:"Geraldo Martins de Andrade",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:115,nome:"Gerfesson Junior Araujo Tavares",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:116,nome:"Guilherme Campos Monteiro",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:117,nome:"Guilherme Grangeiro Antas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:118,nome:"Gustavo Brito Deriu",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:119,nome:"Gustavo Lucena de Sales",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:120,nome:"Heitor Dantas Rafael",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:121,nome:"Helio Andrade de Lacerda",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok grau B1",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:122,nome:"Heraclito de Souza Lima Neto",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Sem evolução de artropatia",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:123,nome:"Hyan Cleber Soares de Mendoni",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:124,nome:"Igor Leandro Martins Freitas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:125,nome:"Isaac Benio Virgulino Morais",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:126,nome:"Jackson Wendel Pereira de Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:127,nome:"Jadilson Cosmo da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok grau B1",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:128,nome:"Jaelson Pereira de Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho esquerdo",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:129,nome:"Jandierni do Nascimento de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:130,nome:"Joî Emanoel Marques de Melo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:131,nome:"João Gabriel Araujo de Menezes",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:132,nome:"Joî Gabriel Rodrigues Campos Dantas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:133,nome:"João Lucas Silva Santana",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:134,nome:"João Paulo Martins de Andrade",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:135,nome:"Joî Pedro Dias Pessoa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:136,nome:"Joî Wesley Virgulino Alves",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:137,nome:"Jonas Amorim Lima dos Anjos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:138,nome:"Jonas Araujo Tavares",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:139,nome:"Jonathan Miguel Cunha de Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:140,nome:"Jose Bento de Souza Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:141,nome:"José Bernardo Soares da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:142,nome:"Jose Cleiton Souza da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Cotovelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:143,nome:"José do Carmo Ferreira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:144,nome:"José Friedson Pereira de Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:145,nome:"José Guedes de Morais",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:146,nome:"José Luiz Pereira Rodrigues",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:147,nome:"José Nan da Silva Filho",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:148,nome:"José Nildo do Nascimento",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:149,nome:"Jose Rodrigues Alecrim",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:150,nome:"Jose Romao Silva Neto",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho grau B1",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:151,nome:"José Vitor Silva Ramo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:152,nome:"Jose Werlandie Aureliano Lacerda",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:153,nome:"Jozenio Francisco de Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho grau B1",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:154,nome:"Kaleb da Silva Santana",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:155,nome:"Lian Lucca de Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:156,nome:"Lindomar Eufrazio de Lacerda",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho esquerdo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:157,nome:"Liviston Trajano de Sousa Junior",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:158,nome:"Lorenzo da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:159,nome:"Luan Davi Pereira Brito",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:160,nome:"Lucas Augusto Brito Deriu",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:161,nome:"Lucas do Nascimento Justulino",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:162,nome:"Lucca Gondim Leal",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:163,nome:"Manoel Galdino da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:164,nome:"Miguel Ferreira Lima",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho e Tornozelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:165,nome:"Marcelo Pereira Teixeira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho e Tornozelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:166,nome:"Marcos Antero Correia de Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:167,nome:"Marcos Vinicius Carneiro Soares",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:168,nome:"Maria Damaris Alves de Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelhos ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:169,nome:"Marcolino Lino de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:170,nome:"Marco Lucio de Oliveira Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelhos ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:171,nome:"Mateus da Silva Nunes",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:172,nome:"Mateus Martins de Vasconcelos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:173,nome:"Mateus da Conceição Fran",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:174,nome:"Mateus Henrique dos Santos Lucas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:175,nome:"Mateus Henrique Pinheiro Macedo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:176,nome:"Mateus dos Santos Demonte",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:177,nome:"Miguel Bartiliano Pereira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:178,nome:"Miguel Beto Barbosa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:179,nome:"Miguel Carneiro dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:180,nome:"Natan Dhemoon Alves Basilio",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:181,nome:"Natan Wilis de Fran Brito",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:182,nome:"Nicolas Marcelo Inacio Lins",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:183,nome:"Nuno Pablo de Oliveira Marques",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:184,nome:"Nicollas Miguel Lima Dantas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:185,nome:"João Elvis Bezerra Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Tornozelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:186,nome:"Pedro José da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:187,nome:"Pedro Lucca Araújo de Carvalho",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:188,nome:"Philipe Gabriel Batista Bezerra",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:189,nome:"Philipe Leandro de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:190,nome:"Rafael de Barros Leite",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:191,nome:"Rafael Ferreira Almeida",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:192,nome:"Rafael Neves Dantas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:193,nome:"Ravy Galdino Farias",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:194,nome:"Rivelino Moreira de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:195,nome:"Roberto Bernardo de Farias",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:196,nome:"Robson de Moraes Bezerra Filho",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Tornozelo ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:197,nome:"Rodolfo Silva Belmiro",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:198,nome:"Rodrigo Ferreira de Almeida",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:199,nome:"Rosimar Ferreira Lima",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho grau B1",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:200,nome:"Rubens Rafael Galdino da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:201,nome:"Sandro Carvalho dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:202,nome:"Sebastião Carneiro da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:203,nome:"Severino Elias Simões Neto",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:204,nome:"Sidgley Camilo da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:205,nome:"Tarcísio Silva Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:206,nome:"Thalles Alves da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:207,nome:"Thyago Cosmo Fonseca Fortunato",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:208,nome:"Theo Garcia Fernandes",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia B",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:209,nome:"Thiago Andrade Guedes",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Cotovelo e Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:210,nome:"Thiago Soares de Frani Filho",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:211,nome:"Tulio Marcos da Costa Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:212,nome:"Valdemir Gomes do Nascimento",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:213,nome:"Valmir Avelino Segundo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:214,nome:"Vinicius Luccas de Oliveira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:215,nome:"Vinicius Nascimento Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:216,nome:"Wellington Pereira Nan",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Tornozelo Direito",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:217,nome:"Weverson da Silva Freitas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:218,nome:"Wilbert Gomes Raposo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"Artropatia: Cotovelo e Joelho ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:219,nome:"Wilker Gomes Raposo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"Hemofilia A",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+,
+  {id:220,nome:"Gillyane Batista do Nascimento",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:221,nome:"Gleyce Kelly de Oliveira Bernardo",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:222,nome:"Heloisa Nobrega Gusmão Parrão",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:223,nome:"Hendrick Raylan Ferreira da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:224,nome:"Hendrick Ryann Ribeiro Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:225,nome:"Hiago Nicolas Freitas Martins",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:226,nome:"Higor Coelho da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"Quadril ok",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:227,nome:"Iane Nascimento da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:228,nome:"Icaro Ravi da Silva Sousa",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:229,nome:"Isabella Beatriz Lima Carvalho",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:230,nome:"Isaque de Melo Queiroz",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:231,nome:"Italo Faustino dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:232,nome:"Ivanclécia Rosilda da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:233,nome:"Izabelly da Silva Falcao Chagas",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:234,nome:"Jadson Roberto Lira Golzio",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:235,nome:"Jaime Leopoldino dos Santos Junior",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:236,nome:"Jamille Bezerra de Santana da Silva",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:237,nome:"Janaina de Souza Ferreira",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:238,nome:"Jane Domingos dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:239,nome:"Jean Laércio Santos do Nascimento",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:240,nome:"Jerfesson Eric do Nascimento",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:241,nome:"Jessica Silva Freire",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:242,nome:"Joab Candido de Souza",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:243,nome:"Joalisson Felix dos Santos",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"Óbito registrado",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:244,nome:"João Ferreira Bezerra Filho",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:245,nome:"João Vitor de Lima Afreu",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:246,nome:"João Vitor Nunes Lucena",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:247,nome:"Joedana de França Cardoso",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:248,nome:"Joelington da Silva Avelino",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Masculino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"},
+  {id:249,nome:"Jordana de França Cardoso",nasc:"—",nascISO:"",idade:0,pront:"—",tipo:"grave",ultima:"—",ultimaISO:"",sexo:"Feminino",coag:"An. Falciforme",prof:"—",acesso:"—",inib:"Negativo",obs:"",resp:"—",tel:"—",gs:"—",peso:"—"}
+];
+const DEFAULT_EX=[
+  {id:1,pacId:1,tipo:"Dosagem de Fator VIII",data:"24/04/2025",dataISO:"2025-04-24",res:"2%",met:"Cromogênico",lab:"Lab. Hemato",obs:""},
+  {id:2,pacId:1,tipo:"Dosagem de Fator VIII",data:"10/01/2025",dataISO:"2025-01-10",res:"<1%",met:"Cromogênico",lab:"Lab. Hemato",obs:""},
+  {id:3,pacId:1,tipo:"Dosagem de Fator VIII",data:"05/09/2024",dataISO:"2024-09-05",res:"1%",met:"Cromogênico",lab:"Lab. Hemato",obs:""},
+  {id:4,pacId:1,tipo:"Inibidor (Anticorpo)",data:"24/04/2025",dataISO:"2025-04-24",res:"0,4 BU",met:"Bethesda",lab:"Lab. Hemato",obs:"Negativo"},
+];
+const DEFAULT_MEDS=[
+  {id:1,pacId:1,nome:"Fator VIII Recombinante",dose:"2500 UI",freq:"3x/sem",via:"IV",inicio:"15/01/2024",inicioISO:"2024-01-15",situacao:"Em uso",obs:"Profilaxia primária"},
+  {id:2,pacId:1,nome:"Ácido Tranexâmico",dose:"500 mg",freq:"2x/dia",via:"VO",inicio:"15/02/2024",inicioISO:"2024-02-15",situacao:"Em uso",obs:"Sangramento gengival"},
+  {id:3,pacId:1,nome:"Vitamina D",dose:"2000 UI",freq:"1x/dia",via:"VO",inicio:"01/03/2024",inicioISO:"2024-03-01",situacao:"Em uso",obs:"Suplementação"},
+  {id:4,pacId:1,nome:"Paracetamol",dose:"500 mg",freq:"S.n.",via:"VO",inicio:"10/02/2024",inicioISO:"2024-02-10",situacao:"Em uso",obs:"Dor leve"},
+];
+const DEFAULT_EPS=[];
+const DEFAULT_USERS=[{crm:"11707",nome:"Dr. Rodrigo Cahuana Chipayo",role:"master",esp:"Hematologia",pass:"master123",av:"RC"}];
+
+// Version check - forces reset if patient list version changed
+const DATA_VERSION = 'v2025-ss-v4';
+if(localStorage.getItem('cg_data_version') !== DATA_VERSION) {
+  LS.set('cg_pats', DEFAULT_PATS);
+  LS.set('cg_ex', DEFAULT_EX);
+  LS.set('cg_meds', DEFAULT_MEDS);
+  LS.set('cg_eps', DEFAULT_EPS);
+  localStorage.setItem('cg_data_version', DATA_VERSION);
+  LS.set('cg_log', []);
+}
+if(!localStorage.getItem('cg_pats'))LS.set('cg_pats',DEFAULT_PATS);
+if(!localStorage.getItem('cg_ex'))LS.set('cg_ex',DEFAULT_EX);
+if(!localStorage.getItem('cg_meds'))LS.set('cg_meds',DEFAULT_MEDS);
+if(!localStorage.getItem('cg_eps'))LS.set('cg_eps',DEFAULT_EPS);
+if(!localStorage.getItem('cg_users'))LS.set('cg_users',DEFAULT_USERS);
+if(!localStorage.getItem('cg_log'))LS.set('cg_log',[]);
+
+const gP=()=>LS.get('cg_pats',DEFAULT_PATS);
+const sP=v=>LS.set('cg_pats',v);
+const gE=()=>LS.get('cg_ex',DEFAULT_EX);
+const sE=v=>LS.set('cg_ex',v);
+const gM=()=>LS.get('cg_meds',DEFAULT_MEDS);
+const sM=v=>LS.set('cg_meds',v);
+const gEp=()=>LS.get('cg_eps',DEFAULT_EPS);
+const sEp=v=>LS.set('cg_eps',v);
+const gU=()=>LS.get('cg_users',DEFAULT_USERS);
+const sU=v=>LS.set('cg_users',v);
+const gLog=()=>LS.get('cg_log',[]);
+function addLog(a){const l=gLog();const n=new Date();l.push({user:CU?CU.nome:'—',action:a,time:n.toLocaleDateString('pt-BR')+' '+n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})});LS.set('cg_log',l);}
+
+/* ══════ HELPERS ══════ */
+const isoToBR=iso=>{if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;};
+const brToISO=br=>{if(!br||!br.includes('/'))return'';const[d,m,y]=br.split('/');return`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;};
+const calcIdade=iso=>{if(!iso)return 0;return new Date().getFullYear()-new Date(iso).getFullYear();};
+const daysSince=iso=>{if(!iso)return 9999;return Math.floor((new Date()-new Date(iso))/(1000*60*60*24));};
+const patGrad=tipo=>tipo==='grave'?'linear-gradient(135deg,#dc2626,#f87171)':tipo==='moderada'?'linear-gradient(135deg,#ea580c,#fb923c)':'linear-gradient(135deg,#16a34a,#4ade80)';
+const initials=nome=>nome.split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0]).join('').toUpperCase()||nome.substring(0,2).toUpperCase();
+
+/* ══════ STATE ══════ */
+let CU=null,pg1=1,pg2=1,PS=5,AP=null,DT='resumo',editingPatId=null;
+let filterCoag='',filterTipo='';
+
+/* ══════ TOAST ══════ */
+let toastTimer;
+function toast(msg,dur=2500){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+/* ══════ LOGIN ══════ */
+function doLogin(){
+  const crm=document.getElementById('lcrm').value.trim();
+  const pass=document.getElementById('lpass').value;
+  const u=gU().find(u=>u.crm===crm&&u.pass===pass);
+  if(!u){const e=document.getElementById('lerr');e.style.display='flex';setTimeout(()=>e.style.display='none',3000);return;}
+  CU=u;
+  document.getElementById('lscreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  setupUI();addLog('Login realizado');
+  renderDashboard();renderT2();updateAlertDot();
+}
+function doLogout(){addLog('Logout');CU=null;document.getElementById('app').style.display='none';document.getElementById('lscreen').style.display='flex';document.getElementById('lcrm').value='';document.getElementById('lpass').value='';}
+document.getElementById('lpass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+function setupUI(){
+  document.getElementById('sname').textContent=CU.nome;
+  document.getElementById('srole').textContent=CU.esp;
+  document.getElementById('sav').textContent=CU.av||CU.nome[0];
+  const b=document.getElementById('sbadge');b.textContent=CU.role==='master'?'Gestor Master':'Gestor';b.style.background=CU.role==='master'?'#f59e0b':'#6366f1';
+  document.getElementById('ng-wrap').innerHTML=CU.role==='master'?'<button class="nb" data-p="gestores"><span class="ni">👥</span>Gestores</button>':'';
+  const ce=CU.role==='master';
+  ['btn-nd','btn-nd2','btn-np'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=ce?'':'none';});
+}
+
+/* ══════ ALERTS ══════ */
+function getVencidos(){
+  const pats=gP().filter(function(p){return p&&(p.coag==='Hemofilia A'||p.coag==='Hemofilia B');}),ex=gE();const alerts=[];
+  pats.forEach(p=>{
+    const pEx=ex.filter(x=>x.pacId===p.id&&x.tipo.includes('Fator'));
+    if(!pEx.length){alerts.push({type:'sem-exame',pac:p.nome,msg:'Nunca realizou dosagem de fator',pacId:p.id});}
+    else{const last=pEx.sort((a,b)=>b.dataISO.localeCompare(a.dataISO))[0];const d=daysSince(last.dataISO);if(d>90)alerts.push({type:'exame-vencido',pac:p.nome,msg:`Última dosagem: ${last.data} (${d} dias)`,pacId:p.id});}
+  });
+  return alerts;
+}
+function updateAlertDot(){
+  const n=getVencidos().length;
+  document.getElementById('alert-dot').textContent=n;
+  document.getElementById('alert-dot').style.display=n>0?'':'none';
+  document.getElementById('notif-dot').style.display=n>0?'':'none';
+}
+
+/* ══════ SIDEBAR ══════ */
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+window.addEventListener('resize',()=>{if(window.innerWidth>=900){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}});
+
+/* ══════ NAV ══════ */
+function nav(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
+  const pe=document.getElementById('page-'+p);if(pe)pe.classList.add('active');
+  const ne=document.querySelector(`[data-p="${p}"]`);if(ne)ne.classList.add('active');
+  if(p==='dashboard')renderDashboard();
+  if(p==='pacientes')renderPacientes();
+  if(p==='exames')renderExamesPage();
+  if(p==='medicacoes')renderMedsPage();
+  if(p==='episodios')renderEpisodiosPage();
+  if(p==='alertas')renderAlertasPage();
+  if(p==='gestores')renderGestores();
+  if(p==='relatorios')renderRelat();
+  if(p==='configuracoes')renderCfg();
+  closeSB();
+}
+document.getElementById('snav').addEventListener('click',e=>{const b=e.target.closest('.nb');if(b&&b.dataset.p)nav(b.dataset.p);});
+function filterAndNav(coag){filterCoag=coag;nav('pacientes');}
+
+/* ══════ BADGES ══════ */
+const BC=t=>t==='grave'?'bg2':t==='moderada'?'bm':'bl';
+const BL=t=>t==='grave'?'Grave':t==='moderada'?'Moderada':'Leve';
+const BK=t=>t==='grave'?'#dc2626':t==='moderada'?'#ea580c':'#16a34a';
+const BN=t=>t==='grave'?'Hemofilia A Grave':t==='moderada'?'Hemofilia A Moderada':'Hemofilia A Leve';
+
+/* ══════ DASHBOARD ══════ */
+function renderDashboard(){
+  const pats=gP(),ex=gE(),meds=gM(),eps=gEp();
+  // Stats
+  const alerts=getVencidos();
+  var medAtivas=meds.filter(function(m){return m.situacao==='Em uso';}).length;var trendCls=alerts.length>0?'trend-down':'trend-up';var trendTxt=alerts.length>0?'⚠️ Atenção necessária':'✅ Tudo em dia';document.getElementById('stats-grid').innerHTML='<div class="stat-card sc-blue"><div class="stat-icon">👤</div><div class="stat-num">'+pats.length+'</div><div class="stat-lbl">Total de Pacientes</div><div class="stat-trend trend-neu">📋 '+medAtivas+' medicações ativas</div></div>'+'<div class="stat-card sc-green"><div class="stat-icon">🧪</div><div class="stat-num">'+ex.length+'</div><div class="stat-lbl">Exames Registrados</div><div class="stat-trend trend-neu">📊 '+gEp().length+' episódios</div></div>'+'<div class="stat-card sc-red"><div class="stat-icon">🔔</div><div class="stat-num">'+alerts.length+'</div><div class="stat-lbl">Alertas Ativos</div><div class="stat-trend '+trendCls+'">'+trendTxt+'</div></div>'+'<div class="stat-card sc-amber"><div class="stat-icon">🩹</div><div class="stat-num">'+eps.length+'</div><div class="stat-lbl">Episódios Registrados</div><div class="stat-trend trend-neu">📅 Últimos 12 meses</div></div>';
+  // Alertas no dash
+  const da=document.getElementById('dash-alerts');
+  if(alerts.length){var ah='<div style="margin-bottom:16px">';alerts.slice(0,3).forEach(function(a){ah+='<div class="abox abox-amber"><div class="abox-icon">⚠️</div><div><div class="at2 at2-amber">'+(a.type==='exame-vencido'?'Exame vencido':'Sem dosagem')+'</div><div class="an2">'+a.pac+'</div><div class="am">'+a.msg+'</div></div></div>';});da.innerHTML=ah+'</div>';}
+  else{da.innerHTML='';}
+  // Bar chart
+  const coags=['Hemofilia A','Hemofilia B','Von Willebrand','Talassemia','An. Falciforme','Doença Falciforme','Outra'];
+  const colors=['#4f46e5','#16a34a','#7c3aed','#d97706','#dc2626','#c2410c','#0891b2'];
+  const counts=coags.map(function(c){return pats.filter(function(p){return p&&p.coag===c;}).length;});
+  const maxC=Math.max(...counts,1);
+  (function(){var bh='';counts.forEach(function(c,i){var lbl=coags[i].replace('Von Willebrand','vW').replace('An. Falciforme','Fal.').replace('Doença Falciforme','D.Fal.');var hgt=Math.max(c/maxC*90,c>0?8:2);bh+='<div class="bar-col"><div class="bar-val">'+c+'</div><div class="bar" style="background:'+colors[i]+';height:'+hgt+'px"></div><div class="bar-lbl">'+lbl+'</div></div>';});var bc=document.getElementById('bar-chart');if(bc)bc.innerHTML=bh;})();;
+  // Cat counts
+  coags.forEach(function(c,i){var id=['cnt-hemA','cnt-hemB','cnt-vW','cnt-tal','cnt-fal','cnt-df','cnt-out'][i];var el2=document.getElementById(id);if(el2)el2.textContent=counts[i]+' pacientes';});
+  // Table
+  renderT1();
+}
+
+/* ══════ TABLES ══════ */
+function filterT(){pg1=1;renderT1();}
+function getFiltered(){
+  const q=(document.getElementById('gsearch').value||'').toLowerCase();
+  let d=gP();
+  if(q)d=d.filter(p=>p.nome.toLowerCase().includes(q)||p.pront.toLowerCase().includes(q));
+  d=d.filter(function(p){return p!=null;});
+  if(filterCoag)d=d.filter(function(p){return p.coag===filterCoag;});
+  if(filterTipo)d=d.filter(function(p){return p.tipo===filterTipo;});
+  return d;
+}
+function renderT1(){
+  const d=getFiltered(),tot=d.length,tp=Math.ceil(tot/PS)||1;
+  if(pg1>tp)pg1=tp;
+  const sl=d.slice((pg1-1)*PS,pg1*PS);
+  document.getElementById('t1').innerHTML=sl.map(p=>rRow(p,false)).join('');
+  document.getElementById('pi1').textContent=`${sl.length} de ${tot} pacientes`;
+  rPag('pb1',tp,pg1,n=>{pg1=n;renderT1();});
+}
+function renderPacientes(){
+  const pats=gP();
+  // Filters UI
+  const coags=['','Hemofilia A','Hemofilia B','Von Willebrand','Talassemia','An. Falciforme','Doença Falciforme','Outra'];
+  document.getElementById('pac-filters').innerHTML=`
+    <select class="fsel-sm" onchange="filterCoag=this.value;filterTipo='';pg2=1;renderPacientes()">
+      ${coags.map(c=>`<option value="${c}" ${filterCoag===c?'selected':''}>${c||'Todas coagulopatias'}</option>`).join('')}
+    </select>
+    <select class="fsel-sm" onchange="filterTipo=this.value;pg2=1;renderPacientes()">
+      <option value="">Todas classificações</option>
+      <option value="grave" ${filterTipo==='grave'?'selected':''}>Grave</option>
+      <option value="moderada" ${filterTipo==='moderada'?'selected':''}>Moderada</option>
+      <option value="leve" ${filterTipo==='leve'?'selected':''}>Leve</option>
+    </select>
+    ${filterCoag||filterTipo?`<button class="filter-chip on" onclick="filterCoag='';filterTipo='';renderPacientes()">✕ Limpar filtros</button>`:''}`;
+  renderT2();
+}
+function renderT2(){
+  const d=getFiltered(),tot=d.length,tp=Math.ceil(tot/PS)||1;
+  if(pg2>tp)pg2=tp;
+  const sl=d.slice((pg2-1)*PS,pg2*PS);
+  document.getElementById('t2').innerHTML=sl.map(p=>rRow(p,true)).join('');
+  document.getElementById('pi2').textContent=`${sl.length} de ${tot} pacientes`;
+  document.getElementById('pac-count-title').textContent=`Pacientes (${tot})`;
+  rPag('pb2',tp,pg2,n=>{pg2=n;renderT2();});
+}
+function rRow(p,showNasc=false){
+  const e=CU&&CU.role==='master';
+  const ex=gE().filter(x=>x.pacId===p.id&&x.tipo.includes('Fator'));
+  const lastEx=ex.length?ex.sort((a,b)=>b.dataISO.localeCompare(a.dataISO))[0]:null;
+  const vencido=!lastEx||daysSince(lastEx.dataISO)>90;
+  return`<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:30px;height:30px;border-radius:8px;background:${patGrad(p.tipo)};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0">${initials(p.nome)}</div>
+        <div><div style="font-weight:700;font-size:12px">${p.nome}</div><div style="font-size:10px;color:var(--muted)">${p.pront}${p.gs&&p.gs!=='—'?' · '+p.gs:''}</div></div>
+      </div>
+    </td>
+    ${showNasc?`<td style="white-space:nowrap;font-size:11px">${p.nasc}<br><span style="color:var(--muted)">${p.idade}a</span></td>`:''}
+    <td><span style="font-size:11px;font-weight:600;color:var(--muted)">${p.coag}</span></td>
+    <td><span class="badge ${BC(p.tipo)}">${BL(p.tipo)}</span></td>
+    <td style="white-space:nowrap">
+      <div style="font-size:11px">${p.ultima}</div>
+      ${vencido?`<div style="font-size:10px;color:var(--red);font-weight:700">⚠️ Exame vencido</div>`:''}
+    </td>
+    <td><div class="acc">
+      <button class="ab av2" title="Ver prontuário" onclick="openDet(${p.id})">👁</button>
+      ${e?`<button class="ab ae" title="Editar" onclick="openEditPat(${p.id})">✏️</button>`:''}
+      ${e?`<button class="ab adel" title="Excluir" onclick="confDel(${p.id})">🗑</button>`:''}
+    </div></td>
+  </tr>`;
+}
+function rRow(p,showNasc){
+  if(!p)return '';
+  var e=CU&&CU.role==='master';
+  var coagHemo=p.coag==='Hemofilia A'||p.coag==='Hemofilia B';
+  var ex=gE().filter(function(x){return x.pacId===p.id&&x.tipo.indexOf('Fator')>=0;});
+  var lastEx=ex.length?ex.sort(function(a,b){return b.dataISO.localeCompare(a.dataISO);})[0]:null;
+  var vencido=coagHemo&&(!lastEx||daysSince(lastEx.dataISO)>90);
+  var nascTd=showNasc?('<td style="white-space:nowrap;font-size:11px">'+p.nasc+'<br><span style="color:var(--muted)">'+p.idade+'a</span></td>'):'';
+  var eBtn=e?('<button class="ab ae" title="Editar" onclick="openEditPat('+p.id+')">✏️</button>'):'';
+  var dBtn=e?('<button class="ab adel" title="Excluir" onclick="confDel('+p.id+')">🗑</button>'):'';
+  var vW=vencido?'<div style="font-size:10px;color:var(--red);font-weight:700">⚠️ Exame vencido</div>':'';
+  return '<tr>'
+    +'<td><div style="display:flex;align-items:center;gap:8px">'
+    +'<div style="width:30px;height:30px;border-radius:8px;background:'+patGrad(p.tipo)+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0">'+initials(p.nome)+'</div>'
+    +'<div><div style="font-weight:700;font-size:12px">'+p.nome+'</div>'
+    +'<div style="font-size:10px;color:var(--muted)">'+p.pront+(p.gs&&p.gs!=='—'?' · '+p.gs:'')+'</div>'
+    +'</div></div></td>'
+    +nascTd
+    +'<td><span style="font-size:11px;font-weight:600;color:var(--muted)">'+p.coag+'</span></td>'
+    +'<td><span class="badge '+BC(p.tipo)+'">'+BL(p.tipo)+'</span></td>'
+    +'<td style="white-space:nowrap"><div style="font-size:11px">'+p.ultima+'</div>'+vW+'</td>'
+    +'<td><div class="acc"><button class="ab av2" title="Ver" onclick="openDet('+p.id+')">👁</button>'+eBtn+dBtn+'</div></td>'
+    +'</tr>';
+}
+
+var _pagCbs={};
+function runPageCb(k,n){if(_pagCbs[k])_pagCbs[k](n);}
+function rPag(id,tot,cur,cb){
+  var k='k'+id.replace(/[^a-z0-9]/gi,'');_pagCbs[k]=cb;
+  var h='';
+  for(var i=1;i<=tot;i++){var cls=i===cur?'pb on':'pb';h+='<button class="'+cls+'" onclick="runPageCb(&#39;'+k+'&#39;,'+i+')">'+i+'</button>';}
+  if(tot>1)h+='<button class="pb" onclick="runPageCb(&#39;'+k+'&#39;,'+Math.min(99,cur+1)+')">›</button>';
+  var elr=document.getElementById(id);if(elr)elr.innerHTML=h;
+}
+
+/* ══════ NOVO PACIENTE ══════ */
+function savePatient(){
+  const nome=document.getElementById('np-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o nome do paciente.');return;}
+  const nascISO=document.getElementById('np-nasc').value;
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const hojeISO=new Date().toISOString().split('T')[0];
+  const pats=gP();
+  pats.push({id:Date.now(),nome,nasc:nascISO?isoToBR(nascISO):'—',nascISO,idade:calcIdade(nascISO),
+    pront:document.getElementById('np-pront').value||'—',tipo:document.getElementById('np-class').value,
+    ultima:hoje,ultimaISO:hojeISO,sexo:document.getElementById('np-sexo').value,
+    coag:document.getElementById('np-coag').value,gs:document.getElementById('np-gs').value,
+    peso:document.getElementById('np-peso').value||'—',
+    prof:document.getElementById('np-prof').value,acesso:document.getElementById('np-acesso').value,
+    inib:'Negativo',obs:document.getElementById('np-obs').value||'Novo paciente.',
+    resp:document.getElementById('np-resp').value||'—',tel:document.getElementById('np-tel').value||'—'});
+  sP(pats);addLog(`Paciente cadastrado: ${nome}`);
+  closeM('new-patient');renderDashboard();renderPacientes();updateAlertDot();
+  ['np-nome','np-nasc','np-pront','np-tel','np-resp','np-obs','np-peso'].forEach(id=>document.getElementById(id).value='');
+  toast('✅ Paciente cadastrado com sucesso!');
+}
+
+/* ══════ EDITAR PACIENTE ══════ */
+function openEditPat(id){
+  const p=gP().find(x=>x.id===id);if(!p)return;
+  editingPatId=id;
+  const fields={nome:p.nome,nasc:p.nascISO||'',sexo:p.sexo,pront:p.pront,coag:p.coag,'class':p.tipo,gs:p.gs||'—',peso:p.peso||'',tel:p.tel,resp:p.resp,prof:p.prof,acesso:p.acesso,inib:p.inib,ultima:p.ultimaISO||'',obs:p.obs};
+  Object.entries(fields).forEach(([k,v])=>{const el=document.getElementById('ep-'+k);if(el)el.value=v;});
+  openM('edit-patient');
+}
+function updatePatient(){
+  if(!editingPatId)return;
+  const pats=gP();const i=pats.findIndex(x=>x.id===editingPatId);if(i<0)return;
+  const nascISO=document.getElementById('ep-nasc').value;
+  const ultimaISO=document.getElementById('ep-ultima').value;
+  pats[i]={...pats[i],nome:document.getElementById('ep-nome').value,nasc:nascISO?isoToBR(nascISO):pats[i].nasc,nascISO,idade:calcIdade(nascISO),
+    pront:document.getElementById('ep-pront').value,tipo:document.getElementById('ep-class').value,
+    sexo:document.getElementById('ep-sexo').value,coag:document.getElementById('ep-coag').value,
+    gs:document.getElementById('ep-gs').value,peso:document.getElementById('ep-peso').value||'—',
+    tel:document.getElementById('ep-tel').value,resp:document.getElementById('ep-resp').value,
+    prof:document.getElementById('ep-prof').value,acesso:document.getElementById('ep-acesso').value,
+    inib:document.getElementById('ep-inib').value,
+    ultima:ultimaISO?isoToBR(ultimaISO):pats[i].ultima,ultimaISO,obs:document.getElementById('ep-obs').value};
+  sP(pats);addLog(`Paciente editado: ${pats[i].nome}`);
+  closeM('edit-patient');renderDashboard();renderPacientes();updateAlertDot();
+  if(AP&&AP.id===editingPatId){AP=pats[i];buildDet();}
+  toast('✅ Paciente atualizado!');
+}
+
+/* ══════ EXCLUIR ══════ */
+function confDel(id){
+  const p=gP().find(x=>x.id===id);if(!p)return;
+  document.getElementById('conf-tit').textContent='🗑 Excluir Paciente';
+  document.getElementById('conf-msg').textContent=`Excluir "${p.nome}" e todos os seus dados? Esta ação não pode ser desfeita.`;
+  document.getElementById('conf-ok').onclick=()=>{sP(gP().filter(x=>x.id!==id));sE(gE().filter(x=>x.pacId!==id));sM(gM().filter(x=>x.pacId!==id));sEp(gEp().filter(x=>x.pacId!==id));addLog(`Excluído: ${p.nome}`);closeM('confirm');renderDashboard();renderPacientes();updateAlertDot();toast('🗑 Paciente excluído.');};
+  openM('confirm');
+}
+
+/* ══════ DETALHE ══════ */
+function openDet(id){AP=gP().find(p=>p.id===id);DT='resumo';buildDet();nav('detail');}
+function buildDet(){
+  const p=AP,ce=CU&&CU.role==='master';
+  const ex=gE().filter(x=>x.pacId===p.id);
+  const meds=gM().filter(x=>x.pacId===p.id);
+  const eps=gEp().filter(x=>x.pacId===p.id);
+  const alerts=getVencidos().filter(a=>a.pacId===p.id);
+  document.getElementById('page-detail').innerHTML=`<div style="padding:16px 14px">
+    <div class="dhdr">
+      <div class="dleft">
+        <button class="backb" onclick="nav('dashboard')">←</button>
+        <div class="pat-avatar" style="background:${patGrad(p.tipo)}">${initials(p.nome)}</div>
+        <div>
+          <h1 class="ptit">${p.nome}</h1>
+          <div class="pmeta">
+            <span class="pmeta-chip">📋 ${p.pront}</span>
+            <span class="pmeta-chip">🎂 ${p.nasc} (${p.idade}a)</span>
+            <span class="pmeta-chip" style="color:${BK(p.tipo)};font-weight:700">● ${p.coag} ${BL(p.tipo)}</span>
+            ${alerts.length?`<span class="pmeta-chip" style="color:var(--red);font-weight:700">⚠️ ${alerts.length} alerta(s)</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${ce?`<button class="btno" onclick="openEditPat(${p.id})">✏️ Editar</button>`:`<span class="badge bgestor">Somente leitura</span>`}
+        <button class="btnw" onclick="window.print()">🖨️</button>
+      </div>
+    </div>
+    <!-- Info rápida -->
+    <div class="info-grid" style="margin-bottom:14px">
+      <div class="info-item"><div class="info-item-lbl">Grupo Sanguíneo</div><div class="info-item-val">${p.gs||'—'}</div></div>
+      <div class="info-item"><div class="info-item-lbl">Peso</div><div class="info-item-val">${p.peso&&p.peso!=='—'?p.peso+' kg':'—'}</div></div>
+      <div class="info-item"><div class="info-item-lbl">Profilaxia</div><div class="info-item-val">${p.prof}</div></div>
+      <div class="info-item"><div class="info-item-lbl">Acesso Venoso</div><div class="info-item-val">${p.acesso}</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tabb${DT==='resumo'?' active':''}" onclick="swTab('resumo')">📋 Resumo</button>
+      <button class="tabb${DT==='exames'?' active':''}" onclick="swTab('exames')">🧪 Exames (${ex.length})</button>
+      <button class="tabb${DT==='medicacoes'?' active':''}" onclick="swTab('medicacoes')">💊 Medicações (${meds.length})</button>
+      <button class="tabb${DT==='episodios'?' active':''}" onclick="swTab('episodios')">🩹 Episódios (${eps.length})</button>
+      <button class="tabb${DT==='alertas'?' active':''}" onclick="swTab('alertas')">🔔 Alertas (${alerts.length})</button>
+    </div>
+    <div id="tcon"></div>
+  </div>`;
+  rTab();
+}
+function swTab(t){DT=t;buildDet();}
+function ir(k,v){return`<div class="ir"><span class="ik">${k}</span><span class="iv">${v}</span></div>`;}
+function rTab(){
+  const p=AP,el=document.getElementById('tcon');if(!el)return;
+  const ex=gE().filter(x=>x.pacId===p.id);
+  const meds=gM().filter(x=>x.pacId===p.id);
+  const eps=gEp().filter(x=>x.pacId===p.id);
+  const alerts=getVencidos().filter(a=>a.pacId===p.id);
+  const ce=CU&&CU.role==='master';
+  if(DT==='resumo'){
+    // Line chart para dosagem de fator
+    const fatEx=ex.filter(x=>x.tipo.includes('Fator')).sort((a,b)=>a.dataISO.localeCompare(b.dataISO));
+    const chartHTML=fatEx.length>=2?buildLineChart(fatEx):'';
+    el.innerHTML=`<div class="dgrid">
+      <div class="dc">
+        <div class="dct">📋 Informações Gerais</div>
+        ${ir('Nascimento',`${p.nasc} (${p.idade} anos)`)}${ir('Sexo',p.sexo)}
+        ${ir('Coagulopatia',p.coag)}${ir('Classificação',BN(p.tipo))}
+        ${ir('Prontuário',p.pront)}${ir('Grupo Sanguíneo',p.gs||'—')}
+        ${ir('Peso',p.peso&&p.peso!=='—'?p.peso+' kg':'—')}
+        ${ir('Telefone',p.tel)}${ir('Responsável',p.resp)}
+        <hr style="border:none;border-top:1px solid var(--border);margin:10px 0"/>
+        ${ir('Profilaxia',p.prof)}${ir('Acesso Venoso',p.acesso)}
+        <div class="ir"><span class="ik">Inibidor</span><span class="${p.inib==='Negativo'?'ivg':'ivr'}">${p.inib}</span></div>
+        ${ir('Última Consulta',p.ultima)}
+        <div style="margin-top:8px"><span class="ik" style="display:block;margin-bottom:3px">Observações</span><span class="iv">${p.obs}</span></div>
+      </div>
+      ${chartHTML?`<div class="dc">
+        <div class="dct">📈 Evolução Dosagem de Fator</div>
+        ${chartHTML}
+        <div style="margin-top:10px">${fatEx.slice(-3).reverse().map(x=>`<div class="ep-card"><div class="ep-title"><span>${x.tipo}</span><span class="badge binfo">${x.res}</span></div><div class="ep-meta">${x.data} · ${x.lab}</div></div>`).join('')}</div>
+      </div>`:
+      `<div class="dc"><div class="dct">🧪 Exames Recentes</div>${ex.length?ex.slice(-3).reverse().map(x=>`<div class="ep-card"><div class="ep-title"><span>${x.tipo}</span><span class="badge binfo">${x.res}</span></div><div class="ep-meta">${x.data} · ${x.lab}</div></div>`).join(''):`<div class="empty-state"><div class="empty-icon">🧪</div><div class="empty-title">Sem exames</div></div>`}</div>`}
+      <div class="dc">
+        <div class="dct">💊 Medicações Ativas</div>
+        ${meds.filter(m=>m.situacao==='Em uso').length?meds.filter(m=>m.situacao==='Em uso').map(m=>`<div class="ep-card"><div class="ep-title"><span>${m.nome}</span><span class="badge bu">Em uso</span></div><div class="ep-meta">${m.dose} · ${m.freq} · ${m.via}</div></div>`).join(''):`<div class="empty-state"><div class="empty-icon">💊</div><div class="empty-title">Sem medicações</div></div>`}
+        ${ce?`<button class="btno" style="width:100%;justify-content:center;margin-top:8px;font-size:11px" onclick="openNewMedFor(${p.id})">+ Adicionar Medicação</button>`:''}
+      </div>
+      ${alerts.length?`<div class="dc"><div class="dct">🔔 Alertas</div>${alerts.map(a=>`<div class="abox abox-red"><div class="abox-icon">🚨</div><div><div class="at2 at2-red">${a.type==='exame-vencido'?'Exame vencido':'Sem exames'}</div><div class="am">${a.msg}</div></div></div>`).join('')}</div>`:''}
+    </div>`;
+  } else if(DT==='exames'){
+    el.innerHTML=`<div class="dc">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+        <div class="dct" style="margin-bottom:0">🧪 Exames de ${p.nome}</div>
+        ${ce?`<button class="btnp" style="font-size:11px" onclick="openNewExamFor(${p.id})">+ Novo Exame</button>`:''}
+      </div>
+      ${ex.length?`<div style="overflow-x:auto"><table><thead><tr><th>Tipo</th><th>Data</th><th>Resultado</th><th>Método</th><th>Lab.</th><th>Obs.</th>${ce?'<th></th>':''}</tr></thead>
+      <tbody>${ex.sort((a,b)=>b.dataISO.localeCompare(a.dataISO)).map(x=>`<tr><td style="font-size:11px">${x.tipo}</td><td style="white-space:nowrap">${x.data}</td><td style="font-weight:700">${x.res}</td><td>${x.met}</td><td>${x.lab}</td><td style="color:var(--muted)">${x.obs||'—'}</td>${ce?`<td><button class="ab adel" onclick="delExame(${x.id})">🗑</button></td>`:''}</tr>`).join('')}</tbody>
+      </table></div>`:`<div class="empty-state"><div class="empty-icon">🧪</div><div class="empty-title">Sem exames registrados</div><div class="empty-sub">Adicione o primeiro exame</div></div>`}
+    </div>`;
+  } else if(DT==='medicacoes'){
+    el.innerHTML=`<div class="dc">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+        <div class="dct" style="margin-bottom:0">💊 Medicações</div>
+        ${ce?`<button class="btnp" style="font-size:11px" onclick="openNewMedFor(${p.id})">+ Nova Medicação</button>`:''}
+      </div>
+      ${meds.length?`<div style="overflow-x:auto"><table><thead><tr><th>Medicação</th><th>Dose</th><th>Freq.</th><th>Via</th><th>Início</th><th>Sit.</th><th>Obs.</th>${ce?'<th></th>':''}</tr></thead>
+      <tbody>${meds.map(m=>`<tr><td style="font-weight:700">${m.nome}</td><td>${m.dose}</td><td>${m.freq}</td><td>${m.via}</td><td>${m.inicio}</td><td><span class="badge ${m.situacao==='Em uso'?'bu':m.situacao==='Suspenso'?'bsus':'bgestor'}">${m.situacao}</span></td><td style="color:var(--muted)">${m.obs}</td>${ce?`<td><button class="ab adel" onclick="delMed(${m.id})">🗑</button></td>`:''}</tr>`).join('')}</tbody>
+      </table></div>`:`<div class="empty-state"><div class="empty-icon">💊</div><div class="empty-title">Sem medicações</div></div>`}
+    </div>`;
+  } else if(DT==='episodios'){
+    el.innerHTML=`<div class="dc">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+        <div class="dct" style="margin-bottom:0">🩹 Episódios de Sangramento</div>
+        ${ce?`<button class="btnp" style="font-size:11px" onclick="openEpFor(${p.id})">+ Registrar Episódio</button>`:''}
+      </div>
+      ${eps.length?eps.sort((a,b)=>b.dataISO.localeCompare(a.dataISO)).map(e=>`
+        <div class="ep-card">
+          <div class="ep-title">
+            <span>${e.local||'Local não informado'}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="badge ${e.grav==='Grave'?'bg2':e.grav==='Moderado'?'bm':'bl'}">${e.grav}</span>
+              ${ce?`<button class="ab adel" style="width:22px;height:22px;font-size:11px" onclick="delEp(${e.id})">🗑</button>`:''}
+            </div>
+          </div>
+          <div class="ep-meta">${e.data} · ${e.causa}</div>
+          ${e.trat?`<div class="ep-meta" style="margin-top:4px">💉 ${e.trat}</div>`:''}
+          ${e.obs?`<div class="ep-meta" style="margin-top:4px;color:var(--navy3)">${e.obs}</div>`:''}
+        </div>`).join(''):`<div class="empty-state"><div class="empty-icon">🩹</div><div class="empty-title">Sem episódios registrados</div></div>`}
+    </div>`;
+  } else {
+    el.innerHTML=`<div class="dc"><div class="dct">🔔 Alertas</div>${alerts.length?alerts.map(a=>`<div class="abox abox-red"><div class="abox-icon">🚨</div><div><div class="at2 at2-red">${a.type==='exame-vencido'?'Exame vencido':'Sem exames'}</div><div class="am">${a.msg}</div></div></div>`).join(''):`<div class="abox abox-green"><div class="abox-icon">✅</div><div><div class="at2 at2-green">Sem alertas</div><div class="am">Paciente em dia</div></div></div>`}</div>`;
+  }
+}
+
+/* ══════ LINE CHART SVG ══════ */
+function buildLineChart(data){
+  const W=280,H=80,pad=20;
+  const vals=data.map(x=>parseFloat(x.res.replace(',','.'))||0);
+  const maxV=Math.max(...vals,1),minV=0;
+  const xStep=(W-pad*2)/(data.length-1);
+  const yScale=v=>H-pad-(v-minV)/(maxV-minV)*(H-pad*2);
+  const pts=vals.map((v,i)=>`${pad+i*xStep},${yScale(v)}`);
+  const area=`M ${pts[0]} ${pts.slice(1).map(p=>`L ${p}`).join(' ')} L ${pad+(data.length-1)*xStep},${H-pad} L ${pad},${H-pad} Z`;
+  const line=`M ${pts[0]} ${pts.slice(1).map(p=>`L ${p}`).join(' ')}`;
+  return`<div class="line-chart-wrap">
+    <svg viewBox="0 0 ${W} ${H}" style="overflow:visible">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4f46e5" stop-opacity=".3"/><stop offset="100%" stop-color="#4f46e5" stop-opacity="0"/></linearGradient></defs>
+      <path d="${area}" fill="url(#lg)"/>
+      <path d="${line}" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${pts.map((pt,i)=>`<circle cx="${pt.split(',')[0]}" cy="${pt.split(',')[1]}" r="3" fill="#4f46e5"/>
+        <text x="${pt.split(',')[0]}" y="${yScale(vals[i])-6}" text-anchor="middle" font-size="8" fill="#334155" font-weight="700">${vals[i]}%</text>
+        <text x="${pt.split(',')[0]}" y="${H-4}" text-anchor="middle" font-size="7" fill="#94a3b8">${data[i].data.substring(0,5)}</text>`).join('')}
+    </svg>
+  </div>`;
+}
+
+/* ══════ EXAMES PAGE ══════ */
+function renderExamesPage(){
+  const ex=gE(),pats=gP(),ce=CU&&CU.role==='master';
+  document.getElementById('exames-body').innerHTML=`
+    <div class="card">
+      <div class="chdr"><span class="ctitle">Todos os Exames (${ex.length})</span>
+        ${ce?`<button class="btnp" onclick="openNewExam()">+ Novo Exame</button>`:''}
+      </div>
+      <div class="cbody"><table><thead><tr><th>Paciente</th><th>Tipo</th><th>Data</th><th>Resultado</th><th>Método</th><th>Lab.</th>${ce?'<th></th>':''}</tr></thead>
+      <tbody>${ex.length?ex.sort((a,b)=>b.dataISO.localeCompare(a.dataISO)).map(x=>{const pat=pats.find(p=>p.id===x.pacId);return`<tr>
+        <td style="font-weight:600;white-space:nowrap;font-size:11px">${pat?pat.nome:'—'}</td>
+        <td style="font-size:11px">${x.tipo}</td><td style="white-space:nowrap">${x.data}</td>
+        <td style="font-weight:700">${x.res}</td><td>${x.met}</td><td>${x.lab}</td>
+        ${ce?`<td><button class="ab adel" onclick="delExame(${x.id});renderExamesPage()">🗑</button></td>`:''}
+      </tr>`;}).join(''):`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🧪</div><div class="empty-title">Nenhum exame registrado</div></div></td></tr>`}
+      </tbody></table></div>
+    </div>`;
+}
+
+/* ══════ MEDS PAGE ══════ */
+function renderMedsPage(){
+  const meds=gM(),pats=gP(),ce=CU&&CU.role==='master';
+  document.getElementById('meds-body').innerHTML=`
+    <div class="card">
+      <div class="chdr"><span class="ctitle">Todas as Medicações (${meds.length})</span>
+        ${ce?`<button class="btnp" onclick="openNewMed()">+ Nova Medicação</button>`:''}
+      </div>
+      <div class="cbody"><table><thead><tr><th>Paciente</th><th>Medicação</th><th>Dose</th><th>Freq.</th><th>Via</th><th>Início</th><th>Sit.</th>${ce?'<th></th>':''}</tr></thead>
+      <tbody>${meds.length?meds.map(m=>{const pat=pats.find(p=>p.id===m.pacId);return`<tr>
+        <td style="font-weight:600;font-size:11px;white-space:nowrap">${pat?pat.nome:'—'}</td>
+        <td style="font-weight:700">${m.nome}</td><td>${m.dose}</td><td>${m.freq}</td><td>${m.via}</td><td style="white-space:nowrap">${m.inicio}</td>
+        <td><span class="badge ${m.situacao==='Em uso'?'bu':m.situacao==='Suspenso'?'bsus':'bgestor'}">${m.situacao}</span></td>
+        ${ce?`<td><button class="ab adel" onclick="delMed(${m.id});renderMedsPage()">🗑</button></td>`:''}
+      </tr>`;}).join(''):`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💊</div><div class="empty-title">Nenhuma medicação registrada</div></div></td></tr>`}
+      </tbody></table></div>
+    </div>`;
+}
+
+/* ══════ EPISÓDIOS PAGE ══════ */
+function renderEpisodiosPage(){
+  const eps=gEp(),pats=gP(),ce=CU&&CU.role==='master';
+  document.getElementById('ep-body').innerHTML=`
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      ${ce?`<button class="btnp" onclick="openNewEp()">+ Registrar Episódio</button>`:''}
+    </div>
+    ${eps.length?eps.sort((a,b)=>b.dataISO.localeCompare(a.dataISO)).map(e=>{const pat=pats.find(p=>p.id===e.pacId);return`
+      <div class="ep-card card" style="padding:14px">
+        <div class="ep-title">
+          <div><span style="font-size:13px;font-weight:800">${pat?pat.nome:'—'}</span><div class="ep-meta">${e.data} · ${e.local||'Local não inf.'} · ${e.causa}</div></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="badge ${e.grav==='Grave'?'bg2':e.grav==='Moderado'?'bm':'bl'}">${e.grav}</span>
+            ${ce?`<button class="ab adel" onclick="delEp(${e.id});renderEpisodiosPage()">🗑</button>`:''}
+          </div>
+        </div>
+        ${e.trat?`<div class="ep-meta" style="margin-top:6px">💉 Tratamento: ${e.trat}</div>`:''}
+        ${e.obs?`<div class="ep-meta" style="margin-top:4px">📝 ${e.obs}</div>`:''}
+      </div>`}).join(''):`<div class="empty-state card" style="padding:40px"><div class="empty-icon">🩹</div><div class="empty-title">Nenhum episódio registrado</div><div class="empty-sub">Registre episódios de sangramento dos pacientes</div></div>`}`;
+}
+
+/* ══════ ALERTAS PAGE ══════ */
+function renderAlertasPage(){
+  const alerts=getVencidos();
+  document.getElementById('alertas-body').innerHTML=alerts.length
+    ?alerts.map(a=>`<div class="abox abox-red card" style="padding:14px;margin-bottom:10px;border-radius:13px"><div class="abox-icon">🚨</div><div style="flex:1"><div class="at2 at2-red">${a.type==='exame-vencido'?'Exame de dosagem vencido':'Sem exames de dosagem'}</div><div class="an2">${a.pac}</div><div class="am">${a.msg}</div><button class="btno" style="margin-top:8px;font-size:11px" onclick="openDet(${a.pacId})">Ver prontuário →</button></div></div>`).join('')
+    :`<div class="abox abox-green card" style="padding:16px;border-radius:13px"><div class="abox-icon">✅</div><div><div class="at2 at2-green">Nenhum alerta ativo</div><div class="am">Todos os pacientes estão com exames em dia.</div></div></div>`;
+}
+
+/* ══════ SALVAR EXAME ══════ */
+function openNewExam(){fillPacSel('ne-pac');openM('new-exam');}
+function openNewExamFor(pacId){fillPacSel('ne-pac');document.getElementById('ne-pac').value=pacId;openM('new-exam');}
+function fillPacSel(id){const s=document.getElementById(id);if(!s)return;s.innerHTML=gP().map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');}
+function saveExam(){
+  const tipo=document.getElementById('ne-tipo').value;
+  const dataISO=document.getElementById('ne-data').value;
+  const res=document.getElementById('ne-res').value.trim();
+  const pacId=parseInt(document.getElementById('ne-pac').value);
+  if(!dataISO||!res){toast('⚠️ Preencha data e resultado.');return;}
+  const ex=gE();
+  ex.push({id:Date.now(),pacId,tipo,data:isoToBR(dataISO),dataISO,res,met:document.getElementById('ne-met').value||'—',lab:document.getElementById('ne-lab').value||'—',obs:document.getElementById('ne-obs').value||''});
+  sE(ex);addLog(`Exame cadastrado: ${tipo}`);
+  closeM('new-exam');['ne-data','ne-res','ne-met','ne-lab','ne-obs'].forEach(id=>document.getElementById(id).value='');
+  renderExamesPage();updateAlertDot();if(AP&&AP.id===pacId)rTab();
+  toast('✅ Exame salvo!');
+}
+function delExame(id){const ex=gE();const x=ex.find(e=>e.id===id);sE(ex.filter(e=>e.id!==id));addLog(`Exame excluído: ${x?x.tipo:id}`);updateAlertDot();if(AP)rTab();toast('🗑 Exame excluído.');}
+
+/* ══════ SALVAR MED ══════ */
+function openNewMed(){fillPacSel('nm-pac');openM('new-med');}
+function openNewMedFor(pacId){fillPacSel('nm-pac');document.getElementById('nm-pac').value=pacId;openM('new-med');}
+function saveMed(){
+  const nome=document.getElementById('nm-nome').value.trim();
+  const pacId=parseInt(document.getElementById('nm-pac').value);
+  if(!nome){toast('⚠️ Informe o nome da medicação.');return;}
+  const inicioISO=document.getElementById('nm-inicio').value;
+  const meds=gM();
+  meds.push({id:Date.now(),pacId,nome,dose:document.getElementById('nm-dose').value||'—',freq:document.getElementById('nm-freq').value||'—',via:document.getElementById('nm-via').value,inicio:inicioISO?isoToBR(inicioISO):'—',inicioISO,situacao:document.getElementById('nm-sit').value,obs:document.getElementById('nm-obs').value||'—'});
+  sM(meds);addLog(`Medicação: ${nome}`);
+  closeM('new-med');['nm-nome','nm-dose','nm-freq','nm-inicio','nm-obs'].forEach(id=>document.getElementById(id).value='');
+  renderMedsPage();if(AP&&AP.id===pacId)rTab();
+  toast('✅ Medicação salva!');
+}
+function delMed(id){const meds=gM();const m=meds.find(x=>x.id===id);sM(meds.filter(x=>x.id!==id));addLog(`Medicação excluída: ${m?m.nome:id}`);if(AP)rTab();renderMedsPage();toast('🗑 Medicação excluída.');}
+
+/* ══════ EPISÓDIOS ══════ */
+function openNewEp(){fillPacSel('nep-pac');openM('new-ep');}
+function openEpFor(pacId){fillPacSel('nep-pac');document.getElementById('nep-pac').value=pacId;openM('new-ep');}
+function saveEpisodio(){
+  const dataISO=document.getElementById('nep-data').value;
+  const pacId=parseInt(document.getElementById('nep-pac').value);
+  if(!dataISO){toast('⚠️ Informe a data.');return;}
+  const eps=gEp();
+  eps.push({id:Date.now(),pacId,data:isoToBR(dataISO),dataISO,local:document.getElementById('nep-local').value,grav:document.getElementById('nep-grav').value,causa:document.getElementById('nep-causa').value,trat:document.getElementById('nep-trat').value,obs:document.getElementById('nep-obs').value});
+  sEp(eps);addLog('Episódio registrado');
+  closeM('new-ep');['nep-data','nep-local','nep-trat','nep-obs'].forEach(id=>document.getElementById(id).value='');
+  renderEpisodiosPage();if(AP&&AP.id===pacId)rTab();
+  toast('✅ Episódio registrado!');
+}
+function delEp(id){const eps=gEp();sEp(eps.filter(e=>e.id!==id));addLog('Episódio excluído');if(AP)rTab();renderEpisodiosPage();toast('🗑 Episódio excluído.');}
+
+/* ══════ GESTORES ══════ */
+function renderGestores(){
+  const users=gU();const others=users.filter(u=>u.crm!=='11707');
+  document.getElementById('glist').innerHTML=others.length
+    ?others.map(u=>`<div class="urow"><div class="uravt">${(u.av||u.nome[0]).substring(0,2)}</div><div class="urinf"><div class="urname">${u.nome}</div><div class="ursub">CRM: ${u.crm} · ${u.esp}</div><span class="badge ${u.role==='gestor'?'bgestor':'bl'}" style="margin-top:3px">${u.role==='gestor'?'Gestor':'Somente leitura'}</span></div><button class="btnd" style="font-size:11px;padding:6px 10px" onclick="confRemG('${u.crm}')">Remover</button></div>`).join('')
+    :'<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Nenhum gestor cadastrado</div></div>';
+  document.getElementById('alog').innerHTML=[...gLog()].reverse().slice(0,30).map(l=>`<div class="logrow"><span style="font-weight:700">${l.user}</span> — ${l.action}<div class="logt">${l.time}</div></div>`).join('')||'<div class="empty-state"><div class="empty-title">Sem atividades</div></div>';
+}
+function confRemG(crm){
+  const u=gU().find(u=>u.crm===crm);if(!u)return;
+  document.getElementById('conf-tit').textContent='Remover Gestor';
+  document.getElementById('conf-msg').textContent=`Remover ${u.nome} (CRM ${u.crm})?`;
+  document.getElementById('conf-ok').onclick=()=>{const users=gU();const i=users.findIndex(u=>u.crm===crm);if(i>-1){addLog(`Gestor removido: ${users[i].nome}`);users.splice(i,1);sU(users);}renderGestores();closeM('confirm');toast('Gestor removido.');};
+  openM('confirm');
+}
+function saveGestor(){
+  const nome=document.getElementById('ng-nome').value.trim();
+  const crm=document.getElementById('ng-crm').value.trim();
+  const pass=document.getElementById('ng-pass').value;
+  if(!nome||!crm||!pass){toast('⚠️ Preencha todos os campos.');return;}
+  const users=gU();
+  if(users.find(u=>u.crm===crm)){toast('⚠️ CRM já cadastrado.');return;}
+  users.push({crm,nome,role:document.getElementById('ng-role').value,esp:document.getElementById('ng-esp').value||'Hematologia',pass,av:initials(nome)});
+  sU(users);addLog(`Gestor cadastrado: ${nome}`);
+  closeM('new-gestor');renderGestores();toast('✅ Gestor cadastrado!');
+  ['ng-nome','ng-crm','ng-esp','ng-pass'].forEach(id=>document.getElementById(id).value='');
+}
+
+/* ══════ RELATÓRIOS ══════ */
+function renderRelat(){
+  const ce=CU&&CU.role==='master',pats=gP();
+  document.getElementById('relat-body').innerHTML=`
+    <div style="display:grid;gap:10px;margin-bottom:20px">
+      <button class="atlb" onclick="exportCSV()"><div class="atl-icon" style="background:#eef2ff">📋</div><div><div style="font-weight:700;font-size:12px">Pacientes (CSV)</div><div style="font-size:10px;color:var(--muted)">${pats.length} pacientes cadastrados</div></div></button>
+      <button class="atlb" onclick="exportExamesCSV()"><div class="atl-icon" style="background:#f0fdf4">🧪</div><div><div style="font-weight:700;font-size:12px">Exames (CSV)</div><div style="font-size:10px;color:var(--muted)">${gE().length} exames registrados</div></div></button>
+      <button class="atlb" onclick="exportMedsCSV()"><div class="atl-icon" style="background:#fff7ed">💊</div><div><div style="font-weight:700;font-size:12px">Medicações (CSV)</div><div style="font-size:10px;color:var(--muted)">${gM().length} medicações registradas</div></div></button>
+      <button class="atlb" onclick="exportEpsCSV()"><div class="atl-icon" style="background:#fef2f2">🩹</div><div><div style="font-weight:700;font-size:12px">Episódios (CSV)</div><div style="font-size:10px;color:var(--muted)">${gEp().length} episódios registrados</div></div></button>
+      <button class="atlb" onclick="exportLog()"><div class="atl-icon" style="background:#f8fafc">📝</div><div><div style="font-weight:700;font-size:12px">Log de Atividades</div><div style="font-size:10px;color:var(--muted)">${gLog().length} registros</div></div></button>
+      ${ce?`<button class="atlb" onclick="exportGestores()"><div class="atl-icon" style="background:#faf5ff">👥</div><div><div style="font-weight:700;font-size:12px">Gestores (CSV)</div><div style="font-size:10px;color:var(--muted)">${gU().length} usuários</div></div></button>`:''}
+    </div>
+    <div class="card cpad">
+      <div class="dct" style="margin-bottom:12px">📊 Resumo Geral</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div style="background:var(--indigo-l);border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:800;color:var(--indigo)">${pats.length}</div><div style="font-size:11px;color:var(--muted)">Total Pacientes</div></div>
+        <div style="background:var(--rl);border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:800;color:var(--red)">${pats.filter(p=>p.tipo==='grave').length}</div><div style="font-size:11px;color:var(--muted)">Casos Graves</div></div>
+        <div style="background:var(--gl);border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:800;color:var(--green)">${pats.filter(p=>p.prof==='Sim').length}</div><div style="font-size:11px;color:var(--muted)">Em Profilaxia</div></div>
+        <div style="background:var(--al);border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:800;color:var(--amber)">${getVencidos().length}</div><div style="font-size:11px;color:var(--muted)">Alertas Ativos</div></div>
+      </div>
+    </div>`;
+}
+function dl(f,h){const a=document.createElement('a');a.href=h;a.download=f;a.click();}
+const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
+function exportCSV(){const h='Nome,Nascimento,Prontuário,Coagulopatia,Classificação,Grupo Sanguíneo,Peso,Profilaxia,Inibidor,Última Consulta,Responsável,Telefone\n';const r=gP().map(p=>`${esc(p.nome)},${esc(p.nasc)},${esc(p.pront)},${esc(p.coag)},${esc(BN(p.tipo))},${esc(p.gs||'—')},${esc(p.peso||'—')},${esc(p.prof)},${esc(p.inib)},${esc(p.ultima)},${esc(p.resp)},${esc(p.tel)}`).join('\n');dl('pacientes.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+r));addLog('CSV pacientes exportado');toast('📋 Exportado!');}
+function exportExamesCSV(){const pats=gP();const h='Paciente,Tipo,Data,Resultado,Método,Laboratório,Observações\n';const r=gE().map(x=>{const p=pats.find(p=>p.id===x.pacId);return`${esc(p?p.nome:'—')},${esc(x.tipo)},${esc(x.data)},${esc(x.res)},${esc(x.met)},${esc(x.lab)},${esc(x.obs||'')}`;}).join('\n');dl('exames.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+r));toast('📋 Exportado!');}
+function exportMedsCSV(){const pats=gP();const h='Paciente,Medicação,Dose,Frequência,Via,Início,Situação,Observações\n';const r=gM().map(m=>{const p=pats.find(p=>p.id===m.pacId);return`${esc(p?p.nome:'—')},${esc(m.nome)},${esc(m.dose)},${esc(m.freq)},${esc(m.via)},${esc(m.inicio)},${esc(m.situacao)},${esc(m.obs)}`;}).join('\n');dl('medicacoes.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+r));toast('📋 Exportado!');}
+function exportEpsCSV(){const pats=gP();const h='Paciente,Data,Local,Gravidade,Causa,Tratamento,Observações\n';const r=gEp().map(e=>{const p=pats.find(p=>p.id===e.pacId);return`${esc(p?p.nome:'—')},${esc(e.data)},${esc(e.local||'—')},${esc(e.grav)},${esc(e.causa)},${esc(e.trat||'—')},${esc(e.obs||'—')}`;}).join('\n');dl('episodios.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+r));toast('📋 Exportado!');}
+function exportLog(){dl('log.txt','data:text/plain;charset=utf-8,'+encodeURIComponent(gLog().map(l=>`[${l.time}] ${l.user}: ${l.action}`).join('\n')));toast('📝 Log exportado!');}
+function exportGestores(){const h='Nome,CRM,Especialidade,Nível\n';dl('gestores.csv','data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+gU().map(u=>`${esc(u.nome)},${esc(u.crm)},${esc(u.esp)},${esc(u.role)}`).join('\n')));toast('📋 Exportado!');}
+
+/* ══════ CONFIG ══════ */
+function renderCfg(){
+  document.getElementById('cfg-body').innerHTML=`
+    <div class="dct">Meu Perfil</div>
+    <div class="info-grid" style="margin-bottom:14px">
+      <div class="info-item"><div class="info-item-lbl">Nome</div><div class="info-item-val" style="font-size:11px">${CU.nome}</div></div>
+      <div class="info-item"><div class="info-item-lbl">CRM</div><div class="info-item-val">${CU.crm}</div></div>
+      <div class="info-item"><div class="info-item-lbl">Especialidade</div><div class="info-item-val">${CU.esp}</div></div>
+      <div class="info-item"><div class="info-item-lbl">Nível</div><div><span class="badge ${CU.role==='master'?'bmaster':'bgestor'}">${CU.role==='master'?'Gestor Master':'Gestor'}</span></div></div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0"/>
+    <div class="dct">🔑 Alterar Senha</div>
+    <div class="fr2" style="margin-top:8px">
+      <div class="fg"><label class="fl">Nova senha</label><input class="fi" id="cp1" type="password" placeholder="••••••••"/></div>
+      <div class="fg"><label class="fl">Confirmar</label><input class="fi" id="cp2" type="password" placeholder="••••••••"/></div>
+    </div>
+    <button class="btnp" onclick="chgPass()">Salvar senha</button>
+    ${CU.role==='master'?`<hr style="border:none;border-top:1px solid var(--border);margin:16px 0"/>
+    <div class="dct" style="color:var(--red)">⚠️ Zona de Perigo</div>
+    <div class="abox abox-red" style="margin-bottom:10px"><div class="abox-icon">🗑</div><div><div class="at2 at2-red">Resetar dados para padrão</div><div class="am">Apaga TODOS os pacientes, exames, medicações e episódios cadastrados. Use com cuidado.</div></div></div>
+    <button class="btnd" onclick="confReset()">Resetar todos os dados</button>`:''}`;
+}
+function chgPass(){const p1=document.getElementById('cp1').value,p2=document.getElementById('cp2').value;if(!p1||p1!==p2){toast('⚠️ Senhas não coincidem.');return;}const u=gU();const i=u.findIndex(x=>x.crm===CU.crm);if(i>-1){u[i].pass=p1;sU(u);}addLog('Senha alterada');toast('✅ Senha alterada!');}
+function confReset(){
+  document.getElementById('conf-tit').textContent='⚠️ Resetar dados';
+  document.getElementById('conf-msg').textContent='Isso apagará TODOS os pacientes, exames, medicações e episódios. Esta ação não pode ser desfeita!';
+  document.getElementById('conf-ok').onclick=()=>{LS.set('cg_pats',DEFAULT_PATS);LS.set('cg_ex',DEFAULT_EX);LS.set('cg_meds',DEFAULT_MEDS);LS.set('cg_eps',DEFAULT_EPS);LS.set('cg_log',[]);addLog('Dados resetados');closeM('confirm');renderDashboard();updateAlertDot();toast('✅ Dados resetados!');};
+  openM('confirm');
+}
+
+/* ══════ MODALS ══════ */
+function openM(id){document.getElementById('modal-'+id).classList.add('show');}
+function closeM(id){document.getElementById('modal-'+id).classList.remove('show');}
+document.querySelectorAll('.mbg').forEach(mb=>{mb.addEventListener('click',e=>{if(e.target===mb){const id=mb.id.replace('modal-','');closeM(id);}});});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mbg.show').forEach(m=>{m.classList.remove('show');});});
+</script>
+</body>
+</html>
